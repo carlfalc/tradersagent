@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Times · Agent RON</title>
+<style>
+:root{
+  --bg:#f4f7f6; --panel:#ffffff; --ink:#0b0d0c; --border:#111317; --soft:#dfe6e4; --soft2:#eef3f1;
+  --muted:#53605d; --dim:#879591; --teal:#007d7d; --teal2:#00a3a3; --teal-bg:#e3f6f6;
+  --hour:#0b0d0c; --min:#007d7d; --sec:#d12a3a; --day:#a85f00; --night:#0a5fc2;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 700px at 72% -12%,#e3f6f6,transparent),var(--bg);
+  color:var(--ink);font:17px/1.5 var(--mono);padding:22px;max-width:1240px;margin:0 auto}
+.banner{background:var(--teal-bg);border:1.5px solid var(--border);color:var(--teal-d);border-radius:12px;padding:11px 16px;font-size:14px;margin-bottom:20px;text-align:center}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.top h1{font-size:30px;margin:0;letter-spacing:2px}
+.tick{width:34px;height:34px;border-radius:9px;background:#111317;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:19px}
+.pill{border:1.5px solid var(--border);border-radius:999px;padding:7px 15px;color:var(--ink);font-size:14px;background:#fff;text-decoration:none}
+
+/* NZ hero */
+.hero{display:flex;gap:28px;align-items:center;flex-wrap:wrap;border:1.5px solid var(--border);border-top:7px solid var(--teal-d);
+  border-radius:18px;background:#fff;padding:24px 28px;margin-bottom:22px}
+.hero .big{display:flex;flex-direction:column;gap:4px}
+.hero .lab{font-size:15px;letter-spacing:2px;text-transform:uppercase;color:var(--teal-d);font-weight:700}
+.hero .time{font-size:64px;font-weight:800;line-height:1;color:var(--ink);letter-spacing:1px}
+.hero .time .ss{font-size:30px;color:var(--teal-d)}
+.hero .meta{font-size:15px;color:var(--muted);margin-top:4px}
+.hero .meta b{color:var(--ink)}
+
+/* clock grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero .time{font-size:48px}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}}
+.clk{border:1.5px solid var(--border);border-radius:16px;background:#fff;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative}
+.clk.live{border-color:var(--teal-d);box-shadow:0 0 0 2px var(--teal-bg)}
+.clk .hd{width:100%;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.clk .city{font-size:18px;font-weight:800}
+.clk .cc{font-size:12px;color:var(--muted)}
+.clk .sess{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1.5px solid var(--soft);color:var(--muted)}
+.clk .sess.on{border-color:var(--teal-d);color:var(--teal-d);background:var(--teal-bg)}
+.face{width:150px;height:150px}
+.clk .digi{font-size:30px;font-weight:800;letter-spacing:1px;color:var(--teal-d)}
+.clk .digi .ss{font-size:16px;color:var(--muted)}
+.clk .sub{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.5}
+.clk .sub b{color:var(--ink)}
+.dn{font-size:19px;font-weight:800;letter-spacing:.3px;margin-top:2px}
+.dn.day{color:var(--day)}.dn.night{color:var(--night)}
+.foot{font-size:12px;color:var(--dim);text-align:center;padding:16px 0 6px}
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="tick">✓</span><h1>WORLD TIMES</h1>
+    <a class="pill" href="/">← Back to dashboard</a>
+  </div>
+
+  <!-- NZ hero -->
+  <div class="hero">
+    <svg class="face" id="face-hero" width="170" height="170" viewBox="0 0 200 200"></svg>
+    <div class="big">
+      <div class="lab" id="nzLab">New Zealand</div>
+      <div class="time" id="nzTime">--:--<span class="ss">:--</span></div>
+      <div class="meta" id="nzMeta">—</div>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot">Times update live and follow each city's daylight-saving automatically. New Zealand matches your device clock.</div>
+
+<script>
+const CITIES=[
+  {key:"hero", city:"New Zealand", cc:"Aotearoa", tz:"Pacific/Auckland", hero:true},
+  {key:"gc",   city:"Gold Coast",  cc:"Australia · QLD", tz:"Australia/Brisbane"},
+  {key:"syd",  city:"Sydney",      cc:"Australia · NSW", tz:"Australia/Sydney"},
+  {key:"tok",  city:"Tokyo",       cc:"Japan", tz:"Asia/Tokyo", session:"Asian"},
+  {key:"fra",  city:"Frankfurt",   cc:"Germany", tz:"Europe/Berlin", session:"European"},
+  {key:"lon",  city:"London",      cc:"United Kingdom", tz:"Europe/London", session:"European"},
+  {key:"nyc",  city:"New York",    cc:"USA · East", tz:"America/New_York", session:"US"},
+  {key:"la",   city:"Los Angeles", cc:"USA · West", tz:"America/Los_Angeles"},
+];
+// approx FX trading-session windows in each hub's LOCAL time (weekday)
+const SESSION_HOURS={Asian:[9,15], European:[8,17], US:[8,17]};
+
+function tparts(tz){
+  const f=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour12:false,
+    hour:'2-digit',minute:'2-digit',second:'2-digit',weekday:'short',day:'2-digit',month:'short'});
+  const o={}; f.formatToParts(new Date()).forEach(p=>o[p.type]=p.value);
+  let hr=parseInt(o.hour,10); if(hr===24)hr=0;
+  return {h:hr, m:parseInt(o.minute,10), s:parseInt(o.second,10),
+          wd:o.weekday, day:o.day, mon:o.month};
+}
+function tzName(tz){
+  try{ const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,timeZoneName:'short'}).formatToParts(new Date());
+    return (p.find(x=>x.type==='timeZoneName')||{}).value||''; }catch(e){return '';}
+}
+function tzOffset(tz){
+  try{ const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,timeZoneName:'shortOffset'}).formatToParts(new Date());
+    return (p.find(x=>x.type==='timeZoneName')||{}).value||''; }catch(e){return '';}
+}
+const pad=n=>String(n).padStart(2,'0');
+const to12=h=>{const ap=h>=12?'pm':'am';let hh=h%12;if(hh===0)hh=12;return{hh,ap};};
+const isWeekday=wd=>!['Sat','Sun'].includes(wd);
+
+function faceSVG(id){
+  // build a clean analog dial with numerals once
+  let el=document.getElementById(id); if(!el||el.dataset.built)return el;
+  const NS="http://www.w3.org/2000/svg"; const cx=100,cy=100,r=92;
+  el.innerHTML="";
+  const bg=document.createElementNS(NS,"circle");
+  bg.setAttribute("cx",cx);bg.setAttribute("cy",cy);bg.setAttribute("r",r);
+  bg.setAttribute("fill","#fff");bg.setAttribute("stroke","#111317");bg.setAttribute("stroke-width","3");el.appendChild(bg);
+  for(let i=0;i<60;i++){ // ticks
+    const a=i*6*Math.PI/180, big=i%5===0;
+    const r1=big?r-10:r-5, r2=r-2;
+    const ln=document.createElementNS(NS,"line");
+    ln.setAttribute("x1",cx+r1*Math.sin(a));ln.setAttribute("y1",cy-r1*Math.cos(a));
+    ln.setAttribute("x2",cx+r2*Math.sin(a));ln.setAttribute("y2",cy-r2*Math.cos(a));
+    ln.setAttribute("stroke",big?"#111317":"#cdd6d4");ln.setAttribute("stroke-width",big?"2.4":"1");el.appendChild(ln);
+  }
+  for(let n=1;n<=12;n++){ // numerals
+    const a=n*30*Math.PI/180, rr=r-26;
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",cx+rr*Math.sin(a));t.setAttribute("y",cy-rr*Math.cos(a));
+    t.setAttribute("text-anchor","middle");t.setAttribute("dominant-baseline","central");
+    t.setAttribute("font-family","SF Mono,monospace");t.setAttribute("font-size","16");
+    t.setAttribute("font-weight","800");t.setAttribute("fill","#0b0d0c");t.textContent=n;el.appendChild(t);
+  }
+  const mk=(w,len,col,back,id2)=>{const l=document.createElementNS(NS,"line");
+    l.setAttribute("x1",cx);l.setAttribute("y1",cy+ (back||0));l.setAttribute("x2",cx);l.setAttribute("y2",cy-len);
+    l.setAttribute("stroke",col);l.setAttribute("stroke-width",w);l.setAttribute("stroke-linecap","round");
+    l.setAttribute("id",id+"-"+id2);el.appendChild(l);return l;};
+  mk(5.5,48,"#0b0d0c",10,"h"); mk(3.6,70,"#007d7d",12,"m"); mk(1.8,78,"#d12a3a",16,"s");
+  const cap=document.createElementNS(NS,"circle");cap.setAttribute("cx",cx);cap.setAttribute("cy",cy);
+  cap.setAttribute("r",4.5);cap.setAttribute("fill","#111317");el.appendChild(cap);
+  el.dataset.built="1"; return el;
+}
+function setHands(id,h,m,s){
+  const hA=(h%12+m/60)*30, mA=(m+s/60)*6, sA=s*6;
+  const H=document.getElementById(id+"-h"),M=document.getElementById(id+"-m"),S=document.getElementById(id+"-s");
+  if(H)H.setAttribute("transform",`rotate(${hA} 100 100)`);
+  if(M)M.setAttribute("transform",`rotate(${mA} 100 100)`);
+  if(S)S.setAttribute("transform",`rotate(${sA} 100 100)`);
+}
+
+// build grid cards
+document.getElementById('grid').innerHTML=CITIES.filter(c=>!c.hero).map(c=>`
+  <div class="clk" id="card-${c.key}">
+    <div class="hd"><div><div class="city">${c.city}</div><div class="cc">${c.cc}</div></div>
+      ${c.session?`<span class="sess" id="sess-${c.key}">${c.session}</span>`:''}</div>
+    <svg class="face" id="face-${c.key}" viewBox="0 0 200 200"></svg>
+    <div class="digi" id="digi-${c.key}">--:--<span class="ss">:--</span></div>
+    <div class="sub" id="sub-${c.key}">—</div>
+    <div class="dn" id="dn-${c.key}"></div>
+  </div>`).join('');
+
+CITIES.forEach(c=>faceSVG('face-'+c.key));
+
+function render(){
+  CITIES.forEach(c=>{
+    const t=tparts(c.tz); setHands('face-'+c.key,t.h,t.m,t.s);
+    const dayNight = (t.h>=6&&t.h<18)?'day':'night';
+    const off=tzOffset(c.tz), abbr=tzName(c.tz);
+    if(c.hero){
+      {const c12=to12(t.h);
+      document.getElementById('nzTime').innerHTML=`${c12.hh}:${pad(t.m)}<span class="ss">:${pad(t.s)} ${c12.ap}</span>`;}
+      document.getElementById('nzLab').textContent=`New Zealand${abbr?' · '+abbr:''}`;
+      document.getElementById('nzMeta').innerHTML=`<b>${t.wd} ${t.day} ${t.mon}</b> · ${off} · matches your device clock`;
+      return;
+    }
+    const c12=to12(t.h);
+    document.getElementById('digi-'+c.key).innerHTML=`${c12.hh}:${pad(t.m)}<span class="ss">:${pad(t.s)} ${c12.ap}</span>`;
+    document.getElementById('sub-'+c.key).innerHTML=`<b>${t.wd} ${t.day} ${t.mon}</b> · ${off}${abbr?' · '+abbr:''}`;
+    const dn=document.getElementById('dn-'+c.key); dn.className='dn '+dayNight; dn.textContent=dayNight==='day'?'☀ daytime':'☾ night';
+    if(c.session){
+      const [a,b]=SESSION_HOURS[c.session]; const live=isWeekday(t.wd)&&t.h>=a&&t.h<b;
+      const se=document.getElementById('sess-'+c.key); se.className='sess'+(live?' on':''); se.textContent=c.session+(live?' · live':'');
+      document.getElementById('card-'+c.key).classList.toggle('live',live);
+    }
+  });
+}
+render(); setInterval(render,1000);
+</script>
+</body>
+</html>

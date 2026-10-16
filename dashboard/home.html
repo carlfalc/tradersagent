@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent RON · Gold</title>
+<style>
+:root{
+  --bg:#f4f7f6; --panel:#ffffff; --ink:#0b0d0c; --num:#0b0d0c;
+  --border:#111317; --soft:#dfe6e4; --soft2:#eef3f1;
+  --muted:#53605d; --dim:#879591;
+  --teal:#00a3a3; --teal-d:#007d7d; --teal-bg:#e3f6f6;
+  --pos:#0a8f5c; --pos-bg:#e4f6ee; --neg:#d12a3a; --neg-bg:#fbe7e9; --warn:#a85f00; --warn-bg:#fbf0dd;
+  --time:#0a5fc2; --time-bg:#e7f0fc;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 var(--mono);padding:22px;max-width:1280px;margin:0 auto}
+.banner{background:var(--teal-bg);border:1.5px solid var(--border);color:var(--teal-d);border-radius:12px;padding:12px 18px;font-size:15px;margin-bottom:22px;text-align:center}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.top h1{font-size:34px;margin:0;letter-spacing:2px;color:var(--ink)}
+.tick{width:38px;height:38px;border-radius:10px;background:#111317;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px}
+.pill{border:1.5px solid var(--border);border-radius:999px;padding:7px 16px;color:var(--ink);font-size:15px;background:#fff;text-decoration:none}
+.pill.live{background:var(--teal-bg);border-color:var(--teal-d);color:var(--teal-d);font-weight:700}
+.nowbar{color:var(--muted);font-size:15px;margin:0 0 22px 2px}
+.nowbar b{color:var(--time)}
+
+.sec{background:var(--panel);border:1.5px solid var(--border);border-radius:18px;padding:26px 28px;margin-bottom:22px}
+.sec.hero{background:linear-gradient(180deg,var(--teal-bg),#fff)}
+.eyebrow{font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--teal-d);margin-bottom:6px;font-weight:700}
+h2.sh{font-size:25px;margin:0 0 8px;letter-spacing:.3px}
+.explain{font-size:15px;color:var(--muted);margin:0 0 20px;line-height:1.62;max-width:98ch}
+.explain b{color:var(--ink)}
+.nzt{color:var(--time);font-weight:700}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warnc{color:var(--warn)}.muted{color:var(--muted)}.dim{color:var(--dim)}
+
+.mission{font-size:21px;line-height:1.55;font-weight:700;margin-bottom:18px;max-width:92ch}
+.mission .hl{background:var(--teal-bg);box-shadow:inset 0 -2px var(--teal-d);padding:0 3px}
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.pillar{border:1.5px solid var(--border);border-radius:14px;padding:16px;background:#fff}
+.pillar .n{font-size:13px;color:var(--teal-d);font-weight:700;letter-spacing:1px}
+.pillar .t{font-size:16px;font-weight:700;margin:6px 0 6px}
+.pillar .b{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+.acct{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-end}
+.acct .cell .lab{font-size:14px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.acct .cell .big{font-size:34px;font-weight:800;line-height:1;color:var(--num)}
+.acct .cell .sub{font-size:14px;color:var(--dim);margin-top:8px}
+
+.alerts{display:flex;flex-direction:column;gap:12px}
+.alert{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--border);border-left-width:6px;border-radius:12px;padding:14px 16px;background:#fff}
+.alert.buy{border-left-color:var(--pos)}.alert.sell{border-left-color:var(--neg)}
+.alert.watch{border-left-color:var(--warn)}.alert.info{border-left-color:var(--time)}
+.alert .ic{font-size:20px;line-height:1.2}
+.alert .ttl{font-weight:800;font-size:16px}
+.alert .ttl .k{font-size:12px;letter-spacing:1px;padding:2px 9px;border-radius:999px;margin-right:9px;font-weight:700}
+.alert.buy .k{background:var(--pos-bg);color:var(--pos)}.alert.sell .k{background:var(--neg-bg);color:var(--neg)}
+.alert.watch .k{background:var(--warn-bg);color:var(--warn)}.alert.info .k{background:var(--time-bg);color:var(--time)}
+.alert .bd{font-size:15px;color:var(--muted);margin-top:5px;line-height:1.55}
+.alert .bd b{color:var(--ink)}
+
+.mnow{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:16px 0;border-bottom:1px solid var(--soft)}
+.mrow .k{color:var(--muted);font-size:15px}.mrow .kw{font-weight:800}
+.mrow .v{font-size:22px;font-weight:800;text-align:right;color:var(--num)}
+.mrow .v .stamp{display:block;font-size:13px;color:var(--time);font-weight:600;margin-top:4px}
+
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{text-align:left;color:var(--muted);font-weight:700;font-size:13px;letter-spacing:.5px;padding:12px;border-bottom:2px solid var(--border);text-transform:uppercase}
+td{padding:15px 12px;border-bottom:1px solid var(--soft);vertical-align:top;color:var(--num)}
+tr:last-child td{border-bottom:none}
+.whyrow td{padding-top:0}
+.why-note{background:var(--soft2);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--muted);line-height:1.5}
+.why-note b{color:var(--ink)}
+.sub2{display:block;font-size:13px;color:var(--time);margin-top:4px;font-weight:600}
+.subm{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+
+.patt{display:flex;gap:14px;align-items:flex-start;padding:17px 0;border-bottom:1px solid var(--soft)}
+.patt:last-child{border-bottom:none}
+.dot{width:12px;height:12px;border-radius:50%;margin-top:9px;flex:none}
+.patt .line1{font-size:17px}.patt .meta{font-size:14px;color:var(--muted);margin-top:6px}
+
+.pat{border-bottom:1.5px dotted var(--teal-d);cursor:help;position:relative;font-weight:700;color:var(--ink)}
+.pat .hint{font-size:11px;color:var(--teal-d);vertical-align:super;margin-left:1px}
+.pat .tip{display:none;position:absolute;left:0;bottom:135%;z-index:40;width:300px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.18);font-weight:400}
+.pat:hover .tip{display:block}
+.pat .tip .nm{font-weight:800;color:var(--teal-d)}
+.pat .tip .d{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.55}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tab{border:1.5px solid var(--border);border-radius:999px;padding:7px 18px;font-size:15px;color:var(--ink);cursor:pointer;background:#fff}
+.tab.on{background:#111317;color:#fff}
+.bar{height:10px;border-radius:5px;background:var(--soft2);overflow:hidden;display:inline-block;width:84px;vertical-align:middle;margin-right:8px;border:1px solid var(--soft)}
+.bar>span{display:block;height:100%;background:var(--teal)}
+.tag{font-size:12px;border-radius:999px;padding:3px 11px;font-weight:700;border:1.5px solid}
+.tag.trend{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}
+.tag.chop{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+
+.play{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.pcard{border:1.5px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}
+.pcard .hd{padding:12px 14px;border-bottom:1.5px solid var(--border);font-weight:800;font-size:15px}
+.pcard .hd .w{display:block;font-size:12px;color:var(--time);font-weight:700;margin-top:3px}
+.pcard .bd{padding:12px 14px;font-size:13.5px;line-height:1.5}
+.pcard .row{display:flex;justify-content:space-between;margin:5px 0;gap:8px}
+.pcard .row .k{color:var(--muted)}
+.pcard .plan{margin-top:9px;color:var(--ink);font-weight:700;border-top:1px solid var(--soft);padding-top:9px}
+.pcard .why{margin-top:8px;color:var(--muted);font-size:12.5px;line-height:1.45}
+.pcard .why b{color:var(--teal-d)}
+
+.heat{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:6px}
+.hcell{aspect-ratio:1;border-radius:4px;border:1px solid var(--soft);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.hhours{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:5px;font-size:10px;color:var(--muted);text-align:center}
+.hleg{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.hswatch{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid var(--soft);vertical-align:middle}
+
+.rule{padding:17px 0;border-bottom:1px solid var(--soft)}
+.rule:last-child{border-bottom:none}
+.rule .rh{font-size:17px;font-weight:800}
+.rule .rh .on{color:var(--pos);font-size:13px;border:1.5px solid var(--pos);border-radius:999px;padding:2px 9px;margin-left:6px}
+.rule .rh .off{color:var(--dim);font-size:13px;border:1.5px solid var(--dim);border-radius:999px;padding:2px 9px;margin-left:6px}
+.rule .why{font-size:15px;color:var(--muted);margin-top:7px;line-height:1.6}
+.rule .why b{color:var(--time)}
+
+.ctl{display:flex;gap:12px;flex-wrap:wrap}
+.btn{border:1.5px solid var(--border);background:#fff;color:var(--ink);border-radius:11px;padding:13px 22px;font:inherit;font-size:16px;cursor:pointer;font-weight:700}
+.btn.red{border-color:var(--neg);color:var(--neg);background:var(--neg-bg)}
+.btn.amber{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.foot{font-size:13px;color:var(--dim);text-align:center;padding:4px 0 10px}
+
+/* daily briefing */
+.brief{border:1.5px solid var(--border);border-top:7px solid var(--teal-d);border-radius:18px;background:#fff;padding:26px 28px;margin-bottom:22px}
+.brief .bhead{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;align-items:baseline}
+.brief .when{font-size:13px;color:var(--time);font-weight:700}
+.brief .headline{font-size:21px;font-weight:800;line-height:1.45;margin:10px 0 20px;max-width:95ch}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.bblock{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;background:#fff}
+.bblock .bt{font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bblock .verdict{font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px}
+.bblock .body{font-size:14px;color:var(--muted);line-height:1.55}
+.bblock .body b{color:var(--ink)}
+.sess24{border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.sess24 .s24row{display:grid;grid-template-columns:200px 120px 1fr;gap:14px;padding:13px 16px;border-bottom:1px solid var(--soft);align-items:baseline;font-size:14px}
+.sess24 .s24row:last-child{border-bottom:none}
+.sess24 .s24row.hd{background:var(--soft2);font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.sess24 .nm{font-weight:800}.sess24 .nm span{display:block;font-size:12px;color:var(--time);font-weight:600}
+
+/* weekend / events */
+.weekend{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--border);border-left:7px solid var(--warn);border-radius:14px;background:var(--warn-bg);padding:14px 18px;margin-bottom:22px}
+.weekend .ic{font-size:22px}.weekend .t{font-weight:800;font-size:16px;color:var(--warn)}
+.weekend .b{font-size:14px;color:var(--ink);margin-top:5px;line-height:1.55}
+.events{border:1.5px solid var(--border);border-top:7px solid var(--time);border-radius:18px;background:#fff;padding:26px 28px;margin-bottom:22px}
+.evt{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.evt:last-child{margin-bottom:0}
+.evt .eh{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.evt .eh .nm{font-weight:800;font-size:17px}.evt .eh .tm{color:var(--time);font-weight:700;font-size:14px}
+.evt .eh .imp{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--neg-bg);color:var(--neg)}
+.evt .fc{font-size:14px;color:var(--muted);margin:6px 0 12px;line-height:1.5}
+.scn{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scn .s{border-radius:12px;padding:12px 14px;border:1.5px solid}
+.scn .s.up{border-color:var(--pos);background:var(--pos-bg)}.scn .s.dn{border-color:var(--neg);background:var(--neg-bg)}
+.scn .s .lab{font-weight:800;font-size:14px}.scn .s.up .lab{color:var(--pos)}.scn .s.dn .lab{color:var(--neg)}
+.scn .s .d{font-size:13.5px;color:var(--ink);margin-top:5px;line-height:1.5}
+
+/* agents */
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.agent{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;background:#fff}
+.agent .ah{font-weight:800;font-size:16px;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.agent .state{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:auto;background:var(--pos-bg);color:var(--pos)}
+.agent .now{font-size:14px;color:var(--ink);margin:8px 0 6px;line-height:1.5}
+.agent .next{font-size:13px;color:var(--muted);line-height:1.5}.agent .next b{color:var(--teal-d)}
+.agent .hb{font-size:12px;color:var(--pos);font-weight:700;margin-top:9px;display:flex;align-items:center;gap:6px}
+.agent .hb .pulse{width:8px;height:8px;border-radius:50%;background:var(--pos);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(10,143,92,.5)}70%{box-shadow:0 0 0 7px rgba(10,143,92,0)}100%{box-shadow:0 0 0 0 rgba(10,143,92,0)}}
+.hbbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;background:var(--pos-bg)}
+.hbbar .lead{font-weight:800;color:var(--pos);display:flex;align-items:center;gap:8px}
+.hbbar .lead .pulse{width:9px;height:9px;border-radius:50%;background:var(--pos);animation:pulse 1.8s infinite}
+.hbbar .comp{font-size:13px;color:var(--muted)}.hbbar .comp b{color:var(--ink)}
+.decide{border:2px solid var(--border);border-radius:16px;background:linear-gradient(180deg,var(--teal-bg),#fff);padding:20px 22px;margin-top:16px}
+.decide .dh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.decide .brain{width:34px;height:34px;border-radius:9px;background:#111317;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:19px}
+.decide .verdict{font-size:22px;font-weight:800}
+.decide .lk{margin-left:auto;text-align:right}.decide .lk .pct{font-size:34px;font-weight:800;line-height:1}
+.decide .lk .lb{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.decide .conf{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.decide .chip{font-size:13px;border-radius:999px;padding:4px 11px;border:1.5px solid;font-weight:700}
+.decide .chip.y{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}
+.decide .chip.n{border-color:var(--neg);color:var(--neg);background:var(--neg-bg)}
+.decide .chip.w{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.decide .say{font-size:15px;color:var(--ink);line-height:1.55}
+
+/* team meeting */
+.consensus{border:1.5px solid var(--border);border-left:6px solid var(--pos);background:var(--pos-bg);border-radius:12px;padding:15px 17px;font-size:16px;margin-bottom:18px;line-height:1.55}
+.consensus b{color:var(--ink)}
+.meetwhen{font-size:13px;color:var(--time);font-weight:700;margin-bottom:12px}
+
+/* pop-ups */
+.toasts{position:fixed;top:16px;right:16px;z-index:300;display:flex;flex-direction:column;gap:12px;width:min(360px,calc(100vw - 32px))}
+.toast{border:1.5px solid var(--border);border-left-width:7px;border-radius:12px;background:#fff;box-shadow:0 14px 38px rgba(0,0,0,.22);padding:14px 42px 14px 16px;position:relative;animation:tin .25s ease}
+@keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.toast.buy{border-left-color:var(--pos)}.toast.sell{border-left-color:var(--neg)}
+.toast.watch{border-left-color:var(--warn)}.toast.info{border-left-color:var(--time)}
+.toast .tt{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.toast .tt .k{font-size:11px;letter-spacing:1px;padding:2px 8px;border-radius:999px;font-weight:700}
+.toast.buy .k{background:var(--pos-bg);color:var(--pos)}.toast.sell .k{background:var(--neg-bg);color:var(--neg)}
+.toast.watch .k{background:var(--warn-bg);color:var(--warn)}.toast.info .k{background:var(--time-bg);color:var(--time)}
+.toast .tb{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.5}.toast .tb b{color:var(--ink)}
+.toast .x{position:absolute;top:8px;right:10px;border:none;background:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1}
+.toast .stamp{display:block;font-size:11px;color:var(--time);font-weight:700;margin-top:6px}
+.toast-hint{font-size:12px;color:var(--dim);text-align:right;margin-top:-2px}
+
+/* collapsible */
+.ctiles{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ctile{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;border:1.5px solid}
+.ctile.pos{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}
+.ctile.neg{border-color:var(--neg);color:var(--neg);background:var(--neg-bg)}
+.ctile.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.ctile.info{border-color:var(--time);color:var(--time);background:var(--time-bg)}
+.ctile.teal{border-color:var(--teal-d);color:var(--teal-d);background:var(--teal-bg)}
+.ctile.muted{border-color:var(--soft);color:var(--muted);background:var(--soft2)}
+.ctitle{display:flex;align-items:flex-start;gap:14px;cursor:pointer;user-select:none}
+.ctitle>div:first-child{flex:1}
+.ctitle .eyebrow{margin-bottom:4px}.ctitle h2.sh{margin:0}
+.ctitle .arw{font-size:18px;color:var(--muted);border:1.5px solid var(--border);border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex:none;transition:transform .2s;background:#fff}
+.panel.closed .arw{transform:rotate(-90deg)}
+.panel.closed .cbody{display:none}
+
+@media(max-width:980px){.pillars,.play,.agents,.bgrid{grid-template-columns:repeat(2,1fr)}.mnow{grid-template-columns:1fr}.acct{gap:28px}
+ .sess24 .s24row{grid-template-columns:1fr;gap:4px}.sess24 .s24row.hd{display:none}.scn{grid-template-columns:1fr}
+ th:nth-child(n+7),td:nth-child(n+7){display:none}.heat .hcell{font-size:0}}
+</style>
+</head>
+<body>
+  <div class="banner" id="banner">● connecting to the live engine…</div>
+
+  <div class="top">
+    <span class="tick">✓</span><h1>AGENT RON</h1>
+    <span class="pill live" id="pillInstr">● GOLD · 3-minute chart</span>
+    <a class="pill" href="/dashboard/edge.html">◆ RON EDGE</a>
+    <a class="pill" href="/dashboard/coach.html">◆ COACH LOG</a>
+    <a class="pill" href="/dashboard/ron.html">◆ RON FULL</a>
+    <a class="pill" href="/dashboard/audnzd.html">◆ AUD/NZD</a>
+    <a class="pill" href="/dashboard/world.html">🕐 WORLD TIMES</a>
+  </div>
+  <div class="nowbar" id="nowbar">All times are <b>New Zealand (NZT)</b> — the same clock you read on TradingView.</div>
+
+  <div id="weekendWrap"></div>
+
+  <!-- TEAM MEETING -->
+  <div class="sec" id="secMeeting">
+    <div class="eyebrow">RON, coach &amp; agents · today's team meeting</div>
+    <h2 class="sh">Everyone's call for the day — and who's been right</h2>
+    <div class="explain">At <b>9:00 am NZT every day</b> RON, the coach and all the agents review the <b>last session(s) and the past 24 hours</b>, then each put a call on the day ahead — bullish, bearish or range — with a confidence. Every call is <b>scored at the close</b>, so over time you can see <b>who reads gold best</b>.</div>
+    <div class="meetwhen" id="meetWhen"></div>
+    <div id="meetConsensus"></div>
+    <table><thead><tr><th>Team member</th><th>Call for today</th><th>Confidence</th><th>Why</th><th>Right lately</th></tr></thead><tbody id="meetBody"></tbody></table>
+    <div class="explain" style="margin:16px 0 0">Each call is scored at day's end and the running tally feeds <b>RON's review page</b> — so over the weeks you'll see whether RON, the coach or a particular agent calls gold best.</div>
+  </div>
+
+  <!-- DAILY BRIEFING -->
+  <div class="brief" id="secBrief">
+    <div class="bhead"><div class="eyebrow" style="margin:0">Today's gold briefing · the next 24 hours</div><div class="when" id="briefWhen"></div></div>
+    <div class="headline" id="briefHeadline"></div>
+    <div class="bgrid" id="briefGrid"></div>
+    <div class="sess24" id="briefSess"></div>
+  </div>
+
+  <!-- SCHEDULED EVENTS -->
+  <div class="events" id="secEvents">
+    <div class="eyebrow" style="margin-bottom:6px">Scheduled events · be ready (if / then)</div>
+    <h2 class="sh">Known announcements — and what they'd do to gold</h2>
+    <div class="explain">You can't know what's in a release until it drops — so RON pre-frames <b>both outcomes</b> ahead of time. RON widens caution going in and acts on the actual print.</div>
+    <div id="eventsBody"></div>
+  </div>
+
+  <!-- HERO -->
+  <div class="sec hero">
+    <div class="eyebrow">How RON trades — the engine</div>
+    <div class="mission">RON builds a <span class="hl">separate high-probability playbook for <u>every</u> session</span> — Sydney, Tokyo/Asian, London, the overlap and New York — learning each one's character and hunting the best setups <span class="hl">in all of them</span>. The goal: <span class="hl">find the highest-probability edge available right now, in whatever session is live, and press it.</span></div>
+    <div class="pillars">
+      <div class="pillar"><div class="n">01 · SEE</div><div class="t">Reads every candle</div><div class="b">Trend, structure breaks, support/resistance, volatility, volume and chart patterns — on the 3-minute chart, timestamped in NZT.</div></div>
+      <div class="pillar"><div class="n">02 · LEARN</div><div class="t">Grades its own calls</div><div class="b">Every pattern and trade scored by what price did next, per session and time of day. The playbook sharpens as the sample grows.</div></div>
+      <div class="pillar"><div class="n">03 · DECIDE</div><div class="t">High-probability only</div><div class="b">Trades only when conviction clears its learned floor and the setup matches a proven edge for that session.</div></div>
+      <div class="pillar"><div class="n">04 · PROTECT</div><div class="t">Defends every trade</div><div class="b">Stops outside the spread, winners to break-even then trailing, losing streaks trigger a cool-off.</div></div>
+      <div class="pillar"><div class="n">05 · ADAPT</div><div class="t">Rewrites its own rules</div><div class="b">Floors, filters and cool-offs are set by RON from the data — and changed the moment the numbers say something different.</div></div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="sec">
+    <div class="eyebrow">Agents at work · feeding RON</div>
+    <h2 class="sh">RON's brain — every agent reports, RON decides</h2>
+    <div class="explain">Each specialist agent watches one thing and <b>feeds its read to RON</b>. RON weighs <b>all of them together</b> — the confluence — and makes the final call. <b>Nothing is ever idle:</b> every agent ticks continuously, and the supervisor flags the instant one goes quiet.</div>
+    <div id="heartbeat"></div>
+    <div class="agents" id="agents"></div>
+    <div id="rondecide" style="margin-top:16px"></div>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div class="sec"><div class="eyebrow">The account · live</div><div class="acct" id="acct"></div></div>
+
+  <!-- ALERTS -->
+  <div class="sec">
+    <div class="eyebrow">Alerts &amp; watch · live</div>
+    <h2 class="sh">What to watch right now — and why</h2>
+    <div class="explain">Setups forming, structure about to be tested, trends likely to continue, fresh patterns, and cross-market moves (like the US dollar) that push gold around.</div>
+    <div class="alerts" id="alerts"></div>
+  </div>
+
+  <!-- WHAT'S HAPPENING NOW -->
+  <div class="sec">
+    <div class="eyebrow">What's happening right now</div>
+    <h2 class="sh">The market read — with the NZT time each thing was set</h2>
+    <div class="explain">Log in, see <b>what RON is reading and when</b>, then check TradingView at that same NZT time. Green = up/bullish, red = down/weak. <b>Resistance</b> (ceiling) shown red; <b>support</b> (floor) shown green.</div>
+    <div class="mnow" id="mnow"></div>
+  </div>
+
+  <!-- SESSION PLAYBOOK -->
+  <div class="sec">
+    <div class="eyebrow">RON's playbook — every session, right now</div>
+    <h2 class="sh">What RON has learned to do in each session</h2>
+    <div class="explain">A <b>live, high-probability plan for all five sessions</b> — not just the favourite one. RON trades <b>every</b> session and keeps refining each plan until it pulls its weight.</div>
+    <div class="play" id="play"></div>
+  </div>
+
+  <!-- TODAY'S SESSIONS -->
+  <div class="sec">
+    <div class="eyebrow">Today's sessions so far · how each ended &amp; why</div>
+    <h2 class="sh">A real walk through the day, session by session</h2>
+    <div class="explain">The whole NZT day in order — which sessions trended, which were choppy, when the move started, and why.</div>
+    <table><tbody id="dayBody"></tbody></table>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="sec">
+    <div class="eyebrow">When gold actually moves — by NZT hour</div>
+    <h2 class="sh">The 24-hour clock of activity</h2>
+    <div class="explain">Each square is <b>one hour of the NZT day</b>; darker teal = gold <b>moves more</b> that hour (avg range per candle). This is where the opportunity lives.</div>
+    <div class="heat" id="heat"></div>
+    <div class="hhours" id="hhours"></div>
+    <div class="hleg"><span class="hswatch" style="background:#d7efed"></span> quiet <span class="hswatch" style="background:#66c7c7"></span> active <span class="hswatch" style="background:#007d7d"></span> busiest &nbsp;·&nbsp; numbers = avg points of range per hour</div>
+  </div>
+
+  <!-- PATTERN FEED -->
+  <div class="sec">
+    <div class="eyebrow">Pattern feed · live</div>
+    <h2 class="sh">Every pattern RON spots, the moment it spots it</h2>
+    <div class="explain">Printed with the <span class="nzt">NZT time</span>, the <b>timeframe</b>, the <b>session</b>, and how long ago. Later RON <b>grades</b> it. <span class="pos">Green = paid</span>, <span class="neg">red = missed</span>, <span class="warnc">amber = still playing out</span>. <b>Hover any pattern name</b> to see it drawn.</div>
+    <div id="feed"></div>
+  </div>
+
+  <!-- PATTERNS THAT PAY -->
+  <div class="sec">
+    <div class="eyebrow">Patterns that pay</div>
+    <h2 class="sh">Which patterns actually make money — and when</h2>
+    <div class="explain">Read a row like: &ldquo;a <b>double bottom</b> showed up <b>10 times</b>; <b>7</b> paid (70%), best in <b>London</b>.&rdquo; <b>Hover any pattern name</b> to see it drawn. More times seen = more trustworthy.</div>
+    <table><thead><tr><th>Pattern</th><th>Times seen</th><th>Profitable</th><th>Hit-rate</th><th>Best session</th><th>In plain English</th></tr></thead><tbody id="paysBody"></tbody></table>
+  </div>
+
+  <!-- BEST SESSIONS -->
+  <div class="sec">
+    <div class="eyebrow">Best sessions &amp; times to trade — gold</div>
+    <h2 class="sh">When gold moves — every session, not just the overlap</h2>
+    <div class="explain">Every session, each with its <span class="nzt">NZT window</span>: its lean, trend or chop, direction, average move, how often profitable, and <b>how many times recorded</b> (sample size — bigger = more reliable).</div>
+    <div class="tabs" id="tabs">
+      <span class="tab on" data-p="all">All recorded</span><span class="tab" data-p="today">Today</span>
+      <span class="tab" data-p="week">Last week</span><span class="tab" data-p="month">Last month</span>
+    </div>
+    <table><thead><tr><th>Session (NZT)</th><th>Lean</th><th>Do what</th><th>Trend or chop</th><th>Direction</th><th>Avg move</th><th>Profitable</th><th>Recorded</th></tr></thead><tbody id="sessBody"></tbody></table>
+    <div class="explain" style="margin:18px 0 0" id="sessNote"></div>
+  </div>
+
+  <!-- RULES -->
+  <div class="sec">
+    <div class="eyebrow">RON's current rules — and why it set them</div>
+    <h2 class="sh">The rules RON is trading by right now, in plain English</h2>
+    <div class="explain">RON <b>sets and changes these itself</b> as it learns. Every rule it's running, and <b>the reason behind it</b>.</div>
+    <div id="rulesBody"></div>
+  </div>
+
+  <!-- COACH -->
+  <div class="sec">
+    <div class="eyebrow">ChatGPT coach · latest review</div>
+    <h2 class="sh">An outside second opinion</h2>
+    <div class="explain">A separate AI reads RON's <b>real</b> results and gives an honest read. Advisory only — RON decides.</div>
+    <div id="coachBody" style="font-size:18px;line-height:1.75"></div>
+    <div id="coachSup"></div>
+    <div class="muted" style="font-size:14px;margin-top:12px" id="coachMeta"></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="sec">
+    <div class="eyebrow">Controls</div>
+    <div class="explain">You press these — RON never asks. Close-all flattens every open trade immediately.</div>
+    <div class="ctl">
+      <button class="btn red" onclick="ctl('flatten','Close ALL open trades now?')">Close all trades</button>
+      <button class="btn amber" onclick="ctl('stop','Pause RON (stop new trades)?')">Pause RON</button>
+      <button class="btn" onclick="ctl('resume')">Resume RON</button>
+    </div>
+    <div class="muted" id="ctlMsg" style="font-size:14px;margin-top:12px"></div>
+  </div>
+
+  <div class="foot">Demo account on Eightcap via MetaApi. Figures are real trades; win-rates and session stats grow more reliable as the sample builds. Not financial advice.</div>
+
+<script>
+// ================= live data =================
+let LOOP=window.__TEST_LOOP||null, EDGE=window.__TEST_EDGE||null, BRIEF=window.__TEST_BRIEF||null, MEET=window.__TEST_MEET||null;
+async function grab(u){try{const r=await fetch(u,{cache:'no-store'});return r.ok?await r.json():null;}catch(e){return null;}}
+async function boot(){
+  const [a,b,c,d]=await Promise.all([grab('/results/loop.json'),grab('/results/edge.json'),grab('/results/briefing.json'),grab('/results/meeting.json')]);
+  if(a)LOOP=a; if(b)EDGE=b; if(c)BRIEF=c; if(d)MEET=d;
+  try{renderAll();}catch(e){console.error(e);}
+}
+// ============ helpers ============
+const OFF=()=> (EDGE&&EDGE.nzt_offset)||13;
+function nztTime(epoch){ if(!epoch)return '—'; const d=new Date(epoch*1000 + OFF()*3600000);
+  let h=d.getUTCHours(),m=d.getUTCMinutes(),ap=h>=12?'pm':'am'; h=h%12||12; return `${h}:${String(m).padStart(2,'0')} ${ap}`;}
+function nztNow(){return nztTime(Date.now()/1000);}
+function nztDateTime(epoch){ if(!epoch)return '—'; const d=new Date(epoch*1000 + OFF()*3600000);
+  const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${dn[d.getUTCDay()]} ${d.getUTCDate()} ${mo[d.getUTCMonth()]}, ${nztTime(epoch)} NZT`; }
+function nztDOW(){const d=new Date(Date.now()+OFF()*3600000);return d.getUTCDay();} // 0 Sun..6 Sat
+function ago(sec){ if(sec==null)return ''; sec=Math.max(0,Math.round(sec));
+  if(sec<60)return sec+'s'; if(sec<3600)return Math.round(sec/60)+'m'; if(sec<86400)return Math.round(sec/3600)+'h'; return Math.round(sec/86400)+'d';}
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const PRIM=()=> (LOOP&&LOOP.symbol)|| (EDGE&&EDGE.instruments&&Object.keys(EDGE.instruments)[0]) || null;
+function edgeInstr(){const s=PRIM(); return (EDGE&&EDGE.instruments&&EDGE.instruments[s])||null;}
+const cls=(ok)=>ok?'pos':'neg';
+// session NZT windows (display)
+const SWIN={"Sydney":"9:00 am – 6:00 pm","Tokyo":"12:00 pm – 6:00 pm","Tokyo/Asian":"12:00 pm – 6:00 pm",
+ "London":"8:00 pm – 4:30 am","London/NY overlap":"2:30 am – 5:00 am","New York":"2:30 am – 9:00 am","Off-hours":"—"};
+function swin(s){return SWIN[s]||'';}
+
+// ============ pattern hover ============
+const PAT={
+ "double bottom":{d:"Two lows at about the same level with a bounce between — a 'W'. Sellers failed twice, so price often turns up.",svg:"5,20 18,45 30,25 42,45 55,20"},
+ "double top":{d:"Two highs at about the same level — an 'M'. Buyers failed twice, so price often turns down.",svg:"5,45 18,20 30,40 42,20 55,45"},
+ "bull flag":{d:"A strong push up, then a tight drift down for a pause. Often continues higher after.",svg:"5,50 22,15 30,22 40,30 48,25 55,33"},
+ "bear flag":{d:"A strong drop, then a tight drift up for a pause. Often continues lower after.",svg:"5,15 22,50 30,43 40,35 48,40 55,32"},
+ "breakout up":{d:"Price sits in a tight range, then pushes decisively above it — momentum up.",svg:"5,40 15,38 25,41 35,39 45,18 55,14"},
+ "breakout down":{d:"Price sits in a tight range, then breaks decisively below it — momentum down.",svg:"5,24 15,26 25,23 35,25 45,46 55,50"},
+ "possible head & shoulders":{d:"Three highs, middle tallest — a classic topping shape that can lead to a drop.",svg:"5,45 15,30 25,40 30,18 35,40 45,30 55,45"},
+ "possible inverse H&S":{d:"Three lows, middle deepest — a classic bottoming shape that can lead to a rise.",svg:"5,20 15,35 25,25 30,47 35,25 45,35 55,20"}
+};
+function patSpan(n){if(!n)return '<span class="muted">structure</span>';const p=PAT[n]||{d:"A recurring price shape RON tracks.",svg:"5,30 55,30"};
+ return `<span class="pat">${esc(n)}<span class="hint">⌕</span><span class="tip"><span class="nm">${esc(n)}</span><svg width="100%" height="64" viewBox="0 0 60 60" style="margin-top:8px"><polyline points="${p.svg}" fill="none" stroke="#007d7d" stroke-width="2.5"/></svg><div class="d">${p.d}</div></span></span>`;}
+
+// ============ renderers ============
+function renderBanner(){
+  const b=document.getElementById('banner');
+  if(!LOOP){b.innerHTML='● waiting for the engine — showing structure only. (If this persists, the bot may be restarting.)';return;}
+  const open=LOOP.market_open; const halt=(LOOP.mode_label||'').includes('HALTED');
+  b.style.background=open&&!halt?'var(--pos-bg)':'var(--warn-bg)';
+  b.style.color=open&&!halt?'var(--pos)':'var(--warn)';
+  b.innerHTML=`● ${esc(LOOP.mode_label||LOOP.mode||'live')} · ${open?'market open':'market closed'} · updated ${nztTime(LOOP.updated)} NZT`;
+  document.getElementById('pillInstr').innerHTML=`● ${esc((LOOP.model||'GOLD'))}`;
+}
+function renderNowbar(){
+  const sess=(EDGE&&EDGE.now&&EDGE.now.session)|| (LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.current&&LOOP.ron_sessions.current.label) ||'—';
+  document.getElementById('nowbar').innerHTML=`All times are <b>New Zealand (NZT)</b> — the same clock you read on TradingView. Right now it's <b>${nztNow()} NZT</b>. Current session: <b>${esc(sess)} (${swin(sess)} NZT)</b>.`;
+}
+function renderWeekend(){
+  const dow=nztDOW(); // 0 Sun 6 Sat
+  let html='';
+  if(dow===6||dow===0){ // weekend
+    html=`<div class="weekend"><span class="ic">📅</span><div><div class="t">Weekend — gold is closed, reopens Monday</div>
+     <div class="b">Gold reopens <b>Monday on the Australian session (~7:00 am NZT)</b>. Weekend events — a war flaring, shock news, big US-dollar moves — can <b>gap the open</b>. From <b>7:00 am Monday NZT</b> the News &amp; Macro agent runs <b>hourly weekend-recap updates</b> on how it's likely to hit the open.</div></div></div>`;
+  } else if(dow===5){ // friday
+    html=`<div class="weekend"><span class="ic">📅</span><div><div class="t">Weekend ahead — gold stops trading, reopens Monday</div>
+     <div class="b">Gold closes <b>Saturday ~9:00 am NZT</b> and reopens <b>Monday on the Australian session (~7:00 am NZT)</b>. Weekend news can <b>gap the open</b> — from 7:00 am Monday the News &amp; Macro agent runs hourly weekend-recap updates.</div></div></div>`;
+  }
+  document.getElementById('weekendWrap').innerHTML=html;
+}
+// ---- account ----
+function winRateLastN(n){ const ct=(LOOP&&LOOP.closed_trades)||[]; const s=ct.slice(0,n);
+  if(!s.length)return null; const w=s.filter(t=>(+t.pnl||0)>0).length; return {wr:Math.round(100*w/s.length),w,l:s.length-w,n:s.length};}
+function bestWorstSession(){ const by=(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.by_symbol)||{}; const sym=PRIM();
+  const rows=(by[sym]&&by[sym].rows)||[]; const rated=rows.filter(r=>r.win_rate!=null&&r.n>=2);
+  if(!rated.length)return null; const best=rated.reduce((a,b)=>b.win_rate>a.win_rate?b:a); const worst=rated.reduce((a,b)=>b.win_rate<a.win_rate?b:a);
+  return {best,worst};}
+function renderAccount(){
+  const START=3000; const bal=LOOP?+LOOP.balance:null, eq=LOOP?+LOOP.equity:null;
+  const open=(LOOP&&LOOP.open_positions)||[]; const o=open[0];
+  const wr=winRateLastN(40); const bw=bestWorstSession();
+  let cells='';
+  if(bal!=null){
+   const todayPnl=todaysPnl();
+   cells+=`<div class="cell"><div class="lab">Balance</div><div class="big ${cls(bal>=START)}">$${bal.toLocaleString()}</div><div class="sub">${LOOP.currency||'AUD'} · started $${START.toLocaleString()} · ${bal>=START?'up':'down'} $${Math.abs(Math.round(bal-START))}</div></div>`;
+   cells+=`<div class="cell"><div class="lab">Equity now</div><div class="big ${cls(eq>=START)}">$${(eq).toLocaleString()}</div><div class="sub">balance + open trade</div></div>`;
+   if(o){const up=(+o.unrealized||0); cells+=`<div class="cell"><div class="lab">Open trade</div><div class="big ${up>=0?'pos':'neg'}">${(o.pos>0?'LONG':o.pos<0?'SHORT':'FLAT')} ${o.lots||''}</div><div class="sub"><span class="${up>=0?'pos':'neg'}">${up>=0?'+':''}${up.toFixed(2)}</span> open</div></div>`;}
+   else cells+=`<div class="cell"><div class="lab">Open trade</div><div class="big muted">FLAT</div><div class="sub">no position right now</div></div>`;
+   if(todayPnl!=null)cells+=`<div class="cell"><div class="lab">Today's P&amp;L</div><div class="big ${cls(todayPnl>=0)}">${todayPnl>=0?'+':'−'}$${Math.abs(Math.round(todayPnl))}</div><div class="sub">closed today</div></div>`;
+   if(wr)cells+=`<div class="cell"><div class="lab">Win rate</div><div class="big ${cls(wr.wr>=55)}">${wr.wr}%</div><div class="sub">last ${wr.n} · ${wr.w} won / ${wr.l} lost</div></div>`;
+   if(bw){cells+=`<div class="cell"><div class="lab">Best session · win rate</div><div class="big pos">${bw.best.win_rate}%</div><div class="sub">${esc(bw.best.session)}</div></div>`;
+    cells+=`<div class="cell"><div class="lab">Worst session · win rate</div><div class="big neg">${bw.worst.win_rate}%</div><div class="sub">${esc(bw.worst.session)}</div></div>`;}
+  } else cells=`<div class="cell"><div class="big muted">—</div><div class="sub">waiting for the account feed…</div></div>`;
+  document.getElementById('acct').innerHTML=cells;
+}
+function todaysPnl(){ const ct=(LOOP&&LOOP.closed_trades)||[]; if(!ct.length)return null;
+  const dayStartUTC=Math.floor((Date.now()+OFF()*3600000)/86400000)*86400000 - OFF()*3600000; // NZT midnight in epoch ms
+  let s=0,any=false; ct.forEach(t=>{const tt=(+t.t||0)*1000; if(tt>=dayStartUTC){s+=(+t.pnl||0);any=true;}}); return any?s:0;}
+
+// ---- market now ----
+function renderMnow(){
+  const ei=edgeInstr(); const st=ei&&ei.structure; const per=(EDGE&&EDGE.now&&EDGE.now.per&&EDGE.now.per[PRIM()]);
+  const vol=ei&&ei.volatility; const inst=(LOOP&&LOOP.instruments||[]).find(x=>x.symbol===PRIM());
+  const pol=(LOOP&&LOOP.ron_policy&&LOOP.ron_policy.instruments||[]).find(x=>x.symbol===PRIM());
+  if(!st||!st.ready){document.getElementById('mnow').innerHTML='<div class="mrow"><span class="k">Market read</span><span class="v muted">warming up — needs a bit more candle history</span></div>';return;}
+  const trend=st.trend||'—'; const up=/up/.test(trend); const dn=/down/.test(trend);
+  const stamp=`as of ${nztTime((EDGE&&EDGE.as_of)||Date.now()/1000)} NZT`;
+  const tstamp=st.trend_since?`started ${nztTime(st.trend_since)} NZT`:stamp;
+  const bstamp=st.bos_at?`broke ${nztTime(st.bos_at)} NZT`:stamp;
+  let h='';
+  h+=`<div class="mrow"><span class="k kw">Trend direction</span><span class="v ${up?'pos':dn?'neg':''}">${up?'UP ▲ bullish':dn?'DOWN ▼ bearish':esc(trend)}<span class="stamp">${tstamp}</span></span></div>`;
+  if(st.bos)h+=`<div class="mrow"><span class="k kw">Last structure break</span><span class="v ${/up|bull/i.test(st.bos)?'pos':/down|bear/i.test(st.bos)?'neg':''}">${esc(st.bos)}<span class="stamp">${bstamp}</span></span></div>`;
+  if(st.resistance)h+=`<div class="mrow"><span class="k kw neg">Resistance</span><span class="v neg">${st.resistance.level}<span class="stamp">ceiling · ${st.resistance.set_at?'set '+nztTime(st.resistance.set_at)+' NZT · ':''}${st.resistance.touches||0} touches</span></span></div>`;
+  if(st.support)h+=`<div class="mrow"><span class="k kw pos">Support</span><span class="v pos">${st.support.level}<span class="stamp">floor · ${st.support.set_at?'set '+nztTime(st.support.set_at)+' NZT · ':''}${st.support.touches||0} touches</span></span></div>`;
+  if(st.price!=null)h+=`<div class="mrow"><span class="k kw">Gold price</span><span class="v">${st.price}<span class="stamp">${stamp}</span></span></div>`;
+  if(st.resistance&&st.price!=null)h+=`<div class="mrow"><span class="k kw">Room to resistance</span><span class="v">${(st.resistance.level-st.price).toFixed(1)} pt<span class="stamp">before it taps the ceiling</span></span></div>`;
+  if(vol)h+=`<div class="mrow"><span class="k kw">Volatility</span><span class="v ${vol.regime==='spiking'||vol.regime==='elevated'?'pos':''}">${esc(vol.regime)}<span class="stamp">range ${vol.range_ratio}× normal</span></span></div>`;
+  if(inst&&inst.rsi!=null)h+=`<div class="mrow"><span class="k kw">Momentum (RSI)</span><span class="v ${inst.rsi>=55?'pos':inst.rsi<=45?'neg':''}">${inst.rsi}<span class="stamp">${inst.rsi>=70?'overbought':inst.rsi<=30?'oversold':'neutral'}</span></span></div>`;
+  if(per)h+=`<div class="mrow"><span class="k kw">RON's stance</span><span class="v ${/bull|up/i.test(per.stance)?'pos':/bear|down/i.test(per.stance)?'neg':''}">${esc(per.stance)}${pol?`<span class="stamp">conviction floor ${pol.conv_floor}</span>`:''}</span></div>`;
+  const tq=(LOOP&&LOOP.ron_trend&&LOOP.ron_trend.current);
+  if(tq)h+=`<div class="mrow"><span class="k kw">Trend quality</span><span class="v ${tq.quality!=null?(tq.quality>=55?'pos':'neg'):''}">${tq.quality!=null?tq.quality+'%':'learning'}<span class="stamp">${esc(tq.dir||'')} since ${esc(tq.since_nzt||'')} NZT · ${tq.rel_vol!=null?tq.rel_vol+'× volume'+(tq.vol_surge?' surge':''):'volume —'}</span></span></div>`;
+  document.getElementById('mnow').innerHTML=h;
+}
+
+// ---- agents + decision ----
+function agentCard(ic,nm,now,next,last){return `<div class="agent"><div class="ah">${ic} ${nm}<span class="state">ACTIVE</span></div><div class="now">${now}</div><div class="next">${next}</div><div class="hb"><span class="pulse"></span>live · last ran ${last} ago</div></div>`;}
+function renderAgents(){
+  const mtf=(LOOP&&LOOP.ron_multitf&&LOOP.ron_multitf.rows||[]).find(r=>r.symbol===PRIM());
+  const pat=(LOOP&&LOOP.ron_patterns&&LOOP.ron_patterns.rows||[]).find(r=>r.symbol===PRIM());
+  const vol=(LOOP&&LOOP.ron_volatility&&LOOP.ron_volatility.rows||[]).find(r=>r.symbol===PRIM());
+  const sess=(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.current);
+  const pol=(LOOP&&LOOP.ron_policy&&LOOP.ron_policy.instruments||[]).find(x=>x.symbol===PRIM());
+  const feed=(LOOP&&LOOP.ron_pattern_feed)||{};
+  const coach=(LOOP&&LOOP.ron_coach)||{};
+  const now0=Date.now()/1000;
+  const la=(as)=>ago(as?now0-as:5);
+  let cards='';
+  cards+=agentCard('🧩','Pattern agent',
+    pat?`Structure: <b>${esc(pat.structure||'—')}</b>${pat.pattern?`, pattern <b>${esc(pat.pattern)}</b>`:''}. ${esc(pat.note||'')}`:'Scanning the 3m chart for chart patterns.',
+    `Tracking ${feed.open||0} open pattern(s); ${feed.graded||0} graded so far. Learning which pay by session.`, la(pat&&pat.as_of));
+  const tq=(LOOP&&LOOP.ron_trend&&LOOP.ron_trend.current);
+  cards+=agentCard('📈','Trend agent',
+    mtf?`Multi-timeframe: <b>${esc(mtf.state||'—')}</b>. ${esc(mtf.summary||'')}`+(tq?`<br><b>${tq.dir==='up'?'▲ up':'▼ down'} since ${esc(tq.since_nzt||'')} NZT</b> (${tq.duration_min}m) · quality <b>${tq.quality!=null?tq.quality+'%':'learning'}</b> · volume ${tq.rel_vol!=null?tq.rel_vol+'×'+(tq.vol_surge?' <b>surge</b>':''):'—'}`:''):'Reading 15m / 30m / 1h trend alignment.',
+    `Learning which sessions, hours &amp; volume produce real trends${(LOOP&&LOOP.ron_trend&&LOOP.ron_trend.graded)?` — ${LOOP.ron_trend.graded} graded so far`:''}.`, la(mtf&&mtf.as_of));
+  cards+=agentCard('🏛️','Structure agent',
+    (function(){const ei=edgeInstr(),st=ei&&ei.structure; if(st&&st.ready){return `Mapped <b>resistance ${st.resistance?st.resistance.level:'—'} / support ${st.support?st.support.level:'—'}</b>. Trend ${esc(st.trend||'—')}.`;}return 'Mapping support, resistance and breaks of structure.';})(),
+    'Signals RON on a tap or a break of these levels.', la(EDGE&&EDGE.as_of));
+  cards+=agentCard('🕐','Session agent',
+    sess?`Live session: <b>${esc(sess.label||'—')}</b>. Learning which sessions gold pays in.`:'Tracking the live session and each session\'s edge.',
+    'Prepping the next session\'s playbook.', la(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.as_of));
+  cards+=agentCard('🌍','News &amp; Macro agent',
+    (BRIEF&&BRIEF.usd)?`Last read <b>${nztDateTime(BRIEF.as_of)}</b>. ${esc(BRIEF.usd.verdict||'')} — ${esc((BRIEF.usd.body||'').slice(0,110))}…`:'Scanning world news + the US dollar. <span class="warnc">First read lands on the hourly cron.</span>',
+    'Learning which themes (war, CPI, Fed) move gold most, and weighting them.', BRIEF?la(BRIEF.as_of):'—');
+  cards+=agentCard('🛡️','Risk agent',
+    pol?`Conviction floor <b>${pol.conv_floor}</b>, trend-filter <b>${pol.require_trend?'ON':'OFF'}</b>, stop-streak ${pol.cooldown_streak||0}/3${pol.paused?', <b class="warnc">paused</b>':''}.`:'Guarding size, stops and daily risk.',
+    'Break-even + trailing on winners; cools off after a streak.', la(now0-2));
+  document.getElementById('agents').innerHTML=cards;
+  // heartbeat strip
+  document.getElementById('heartbeat').innerHTML=`<div class="hbbar"><span class="lead"><span class="pulse"></span>ALL SYSTEMS LIVE · nothing idle</span><span class="comp"><b>6</b> agents ticking · pattern &amp; price each cycle · news / US-dollar hourly · coach ~30 min · supervisor watchdog ON</span></div>`;
+  renderDecision();
+}
+function renderDecision(){
+  const sym=PRIM();
+  const inst=(LOOP&&LOOP.instruments||[]).find(x=>x.symbol===sym);
+  const f=((LOOP&&LOOP.ron_fusion)||{})[sym];
+  const open=(LOOP&&LOOP.open_positions)||[];
+  let dir='flat', verd='NO TRADE — standing aside';
+  const bias=inst&&inst.bias;
+  if(bias==='long'){dir='long';} else if(bias==='short'){dir='short';}
+  else if(f&&f.direction>0){dir='long';} else if(f&&f.direction<0){dir='short';}
+  if(dir==='long')verd=(open.length?'LONG ':'LEAN LONG ')+(sym||'GOLD');
+  else if(dir==='short')verd=(open.length?'SHORT ':'LEAN SHORT ')+(sym||'GOLD');
+  let lk=(f&&f.likelihood!=null)?f.likelihood:null;
+  if(lk==null){const cal=LOOP&&LOOP.ron_watch_calibration; if(cal&&cal.win_rate!=null)lk=Math.round(cal.win_rate*(cal.win_rate<=1?100:1));}
+  const chips=((f&&f.contributions)||[]).map(c=>({t:`${esc(c.who)}${c.weight!=null?' · '+Math.round(c.weight*100)+'%':''}`,v:c.dir>0?'y':c.dir<0?'n':'w'}));
+  const say = open.length
+    ? `RON is in a trade (${open[0].pos>0?'LONG':'SHORT'} ${open[0].lots||''}). The chips are each agent's vote, <b>weighted by how accurate it's been</b> on the scoreboard — RON fuses them and only acts when enough agree and conviction clears its learned floor.`
+    : (f&&f.direction
+        ? `The agents lean <b>${f.direction>0?'long':'short'}</b> (confluence ${f.score}). RON acts when conviction also clears its floor — the fusion only nudges that gate, it never forces a trade.`
+        : `Agents are mixed right now — RON stands aside until they line up.`);
+  document.getElementById('rondecide').innerHTML=`<div class="decide"><div class="dh"><span class="brain">🧠</span><span>RON · final decision</span>
+    <span class="verdict ${dir==='long'?'pos':dir==='short'?'neg':'muted'}">${verd}</span>
+    <span class="lk"><div class="pct ${lk!=null?(lk>=55?'pos':'neg'):'muted'}">${lk!=null?lk+'%':'—'}</div><div class="lb">trade likelihood</div></span></div>
+    <div class="conf">${chips.length?chips.map(c=>`<span class="chip ${c.v}">${c.v==='y'?'▲':c.v==='n'?'▼':'~'} ${c.t}</span>`).join(''):'<span class="muted">agents warming up…</span>'}</div>
+    <div class="say">${say}${lk==null?' <span class="muted">(likelihood sharpens as the scoreboard fills)</span>':''}</div></div>`;
+}
+
+// ---- pattern feed ----
+function renderFeed(){
+  const feed=(LOOP&&LOOP.ron_pattern_feed&&LOOP.ron_pattern_feed.feed)||[];
+  if(!feed.length){document.getElementById('feed').innerHTML='<div class="muted">No patterns recorded yet — they print here the moment RON spots one. Builds through the session.</div>';return;}
+  document.getElementById('feed').innerHTML=feed.slice(0,20).map(f=>{
+    const col=f.status==='win'?'var(--pos)':f.status==='loss'?'var(--neg)':'var(--warn)';
+    const grade=f.status==='open'?'<span class="warnc">still open — grading soon</span>'
+      :`<span class="${(f.pts||0)>=0?'pos':'neg'}">${f.status==='win'?'PAID':'MISSED'} ${(f.pts||0)>=0?'+':''}${f.pts}pt</span>`;
+    const t=f.t||(Date.now()/1000-(f.ago_s||0));
+    return `<div class="patt"><span class="dot" style="background:${col}"></span><div>
+      <div class="line1">${patSpan(f.pattern)} @ ${f.price} — ${grade}</div>
+      <div class="meta">printed <span class="nzt">${nztTime(t)} NZT</span> (${ago(f.ago_s)} ago) · <b>3m chart</b> · ${esc(f.session||'')} session<br>${esc(f.note||'')}</div></div></div>`;
+  }).join('');
+}
+// ---- patterns that pay ----
+function renderPays(){
+  const pays=(LOOP&&LOOP.ron_pattern_feed&&LOOP.ron_pattern_feed.pays)||[];
+  if(!pays.length){document.getElementById('paysBody').innerHTML='<tr><td colspan="6" class="muted">No graded patterns yet — hit-rates appear once patterns have had time to play out. Builds over the coming sessions.</td></tr>';return;}
+  document.getElementById('paysBody').innerHTML=pays.map(p=>{
+    const wr=Math.round((p.win_rate!=null?p.win_rate*(p.win_rate<=1?100:1):100*p.wins/Math.max(1,p.n)));
+    const trust=p.n>=10?'<span class="subm">solid sample</span>':p.n>=6?'<span class="subm">fair sample</span>':'<span class="subm">thin — care</span>';
+    return `<tr><td>${patSpan(p.pattern)}</td><td>${p.n} times${trust}</td><td>${p.wins}</td>
+      <td><span class="bar"><span style="width:${wr}%"></span></span><b class="${wr>=55?'pos':'neg'}">${wr}%</b></td>
+      <td class="pos">${esc(p.best_session||'—')}</td>
+      <td class="muted" style="font-size:15px">Seen ${p.n}×, paid ${p.wins}× (${wr}%)${p.best_session?`, best in ${esc(p.best_session)}`:''}.</td></tr>`;
+  }).join('');
+}
+// ---- best sessions ----
+function renderSessions(period){
+  const bp=(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.by_period)||{}; const sym=PRIM();
+  const byAll=(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.by_symbol)||{};
+  const rows=(bp[sym]&&bp[sym][period])||(period==='all'&&byAll[sym]&&byAll[sym].rows)||[];
+  const note=document.getElementById('sessNote');
+  if(!rows.length){const lbl={today:'today (NZT)',week:'the last 7 days',month:'the last 30 days',all:'the record'}[period]||'this period';
+    document.getElementById('sessBody').innerHTML=`<tr><td colspan="8" class="muted">No trades recorded in ${lbl} yet — every session is still being measured. Try <b>All recorded</b>, or check back as trades close.</td></tr>`;note.innerHTML='';return;}
+  document.getElementById('sessBody').innerHTML=rows.map(r=>{
+    const wr=r.win_rate; const lean=wr==null?'flat':wr>=55?'up':wr<=45?'down':'flat';
+    const act=lean==='up'?'BUY':lean==='down'?'SELL':'WAIT';
+    const trend=(r.n>=4&&wr!=null&&(wr>=60||wr<=40))?'trend':'chop';
+    return `<tr><td><b>${esc(r.session)}</b><span class="subm">${swin(r.session)} NZT</span></td>
+      <td class="${lean==='up'?'pos':lean==='down'?'neg':'muted'}">${lean.toUpperCase()}</td>
+      <td class="${act==='BUY'?'pos':act==='SELL'?'neg':'muted'}"><b>${act}</b></td>
+      <td><span class="tag ${trend}">${trend.toUpperCase()}</span></td>
+      <td>${wr==null?'—':wr>=55?'bullish':wr<=45?'bearish':'mixed'}</td>
+      <td class="${(r.pnl||0)>=0?'pos':'neg'}">${(r.pnl||0)>=0?'+':''}$${Math.round(r.pnl||0)}</td>
+      <td class="${wr>=55?'pos':'neg'}">${wr==null?'—':wr+'%'}</td>
+      <td class="muted">${r.n}×</td></tr>`;
+  }).join('');
+  note.innerHTML='"Recorded N×" = how many trades we\'ve measured in that session; bigger = more reliable. Every session is traded and measured.';
+}
+// ---- playbook ----
+function renderPlay(){
+  const by=(LOOP&&LOOP.ron_sessions&&LOOP.ron_sessions.by_symbol)||{}; const sym=PRIM();
+  const rows=(by[sym]&&by[sym].rows)||[]; const curSess=(EDGE&&EDGE.now&&EDGE.now.session);
+  const order=["Sydney","Tokyo","London","London/NY overlap","New York"];
+  const find=s=>rows.find(r=>r.session===s)||rows.find(r=>r.session&&s.startsWith(r.session.split('/')[0]));
+  document.getElementById('play').innerHTML=order.map(s=>{
+    const r=find(s); const wr=r&&r.win_rate; const live=curSess===s;
+    const state=live?'LIVE':wr==null?'LEARNING':wr>=55?'EDGE +':wr<=45?'CAREFUL':'NEUTRAL';
+    const col=state.includes('+')||live?'var(--pos)':state==='CAREFUL'?'var(--warn)':'var(--muted)';
+    return `<div class="pcard"><div class="hd">${esc(s)}<span class="w">${swin(s)} NZT</span></div><div class="bd">
+      <div class="row"><span class="k">Profitable</span><span class="${wr>=55?'pos':wr==null?'muted':'neg'}">${wr==null?'learning…':wr+'%'}</span></div>
+      <div class="row"><span class="k">Trades seen</span><span>${r?r.n:0}×</span></div>
+      <div class="row"><span class="k">Now</span><span style="color:${col};font-weight:800">${state}</span></div>
+      <div class="plan">${live?'Live now — trading its edge this cycle.':wr==null?'Building a read — RON still trades it and learns.':wr>=55?'A proven edge — press it when it\'s live.':'Trade with care; trend-filter guards it.'}</div>
+    </div></div>`;
+  }).join('');
+}
+// ---- today's sessions (derived from closed trades grouped by NZT day+session) ----
+function renderDay(){
+  const ct=(LOOP&&LOOP.closed_trades)||[];
+  const dayStart=Math.floor((Date.now()+OFF()*3600000)/86400000)*86400000 - OFF()*3600000;
+  const today=ct.filter(t=>((+t.t||0)*1000)>=dayStart);
+  const hdr=`<tr><th>Session (NZT window)</th><th>Trades</th><th>Result</th><th>Read</th></tr>`;
+  if(!today.length){document.getElementById('dayBody').innerHTML=hdr+`<tr><td colspan="4" class="muted">No closed trades yet today (NZT). Each session's result and a plain-English "why" will appear here as the day trades. Why-context (news / US-dollar) comes online with the news agent.</td></tr>`;return;}
+  const bySess={};
+  today.forEach(t=>{const s=sessionOf((+t.t||0));(bySess[s]=bySess[s]||{n:0,pnl:0}); bySess[s].n++; bySess[s].pnl+=(+t.pnl||0);});
+  document.getElementById('dayBody').innerHTML=hdr+Object.keys(bySess).map(s=>{const d=bySess[s];
+    return `<tr><td><b>${esc(s)}</b><span class="subm">${swin(s)} NZT</span></td><td>${d.n}</td>
+     <td class="${d.pnl>=0?'pos':'neg'}">${d.pnl>=0?'+':''}$${Math.round(d.pnl)}</td>
+     <td class="muted">${d.pnl>=0?'net positive this session':'net negative — RON adjusting'}</td></tr>`;}).join('');
+}
+// client-side session_of mirror (UTC hours)
+function sessionOf(epoch){const h=new Date(epoch*1000).getUTCHours();
+  const inS=(hh,s,e)=>s<e?(hh>=s&&hh<e):(hh>=s||hh<e);
+  const S=[["Sydney",21,6],["Tokyo",0,9],["London",7,16],["New York",12,21]];
+  const act=S.filter(x=>inS(h,x[1],x[2])).map(x=>x[0]);
+  if(act.includes("London")&&act.includes("New York"))return "London/NY overlap";
+  if(act.includes("London"))return "London"; if(act.includes("New York"))return "New York";
+  if(act.includes("Tokyo")&&act.includes("Sydney"))return "Tokyo"; return act[0]||"Off-hours";}
+// ---- heatmap ----
+function renderHeat(){
+  const ei=edgeInstr(); const hm=ei&&ei.vol_heatmap; const el=document.getElementById('heat'); const hh=document.getElementById('hhours');
+  if(!hm||!hm.matrix||!hm.matrix.length){el.innerHTML='<div class="muted" style="grid-column:1/-1">Heatmap builds as candle history accumulates (a few days).</div>';hh.innerHTML='';return;}
+  // matrix[dow][utchour] -> average across days per utc hour, then place by NZT hour
+  const utc=new Array(24).fill(0),cnt=new Array(24).fill(0);
+  hm.matrix.forEach(row=>{if(!row)return;row.forEach((v,hUtc)=>{if(v){utc[hUtc]+=v;cnt[hUtc]++;}});});
+  const H=new Array(24).fill(0);
+  for(let n=0;n<24;n++){const u=((n-OFF())%24+24)%24; H[n]=cnt[u]?utc[u]/cnt[u]:0;}
+  const mx=Math.max(...H,0.0001);
+  const col=v=>{const t=v/mx,r=Math.round(215-215*t),g=Math.round(239-114*t),b=Math.round(237-112*t);return `rgb(${r},${g},${b})`;};
+  el.innerHTML=H.map((v,i)=>`<div class="hcell" title="${i}:00 NZT · ${v.toFixed(1)}" style="background:${col(v)};color:${v/mx>0.5?'#fff':'#0b0d0c'}">${v?v.toFixed(1):''}</div>`).join('');
+  hh.innerHTML=H.map((v,i)=>`<div>${i}</div>`).join('');
+}
+// ---- rules ----
+function renderRules(){
+  const pol=(LOOP&&LOOP.ron_policy&&LOOP.ron_policy.instruments||[]).find(x=>x.symbol===PRIM());
+  const floor=pol?pol.conv_floor:'0.55'; const tf=pol?pol.require_trend:true; const streak=pol?pol.cooldown_streak:0; const cdn=pol?pol.cooldown_in_s:0;
+  const on='<span class="on">ON</span>', off='<span class="off">OFF</span>';
+  const rules=[
+   {h:`After a losing streak → stand back a short cool-off before the next trade ${cdn>0?'<span class="on">COOLING '+Math.round(cdn/60)+'m</span>':on}`,
+    w:`Why: on the <b>3-minute chart</b>, several quick stops almost always means chop. RON's own records show jumping straight back in just books another loss — a brief pause (about one fresh candle) gives a cleaner entry. Current stop-streak: <b>${streak}/3</b>. RON sets this length itself from the data.`},
+   {h:`Only trade above <b>${floor}</b> conviction ${on}`,
+    w:`Why: below that line RON's past calls were near coin-flips and bled on spread. It <b>ratchets this floor</b> up or down itself as results come in.`},
+   {h:`Trend filter ${tf?on:off} — don't sell an uptrend, don't buy a downtrend`,
+    w:`Why: counter-trend trades have been RON's biggest leak. It switches this ${tf?'on':'off'} by session character — on in trends, off in genuine ranges.`},
+   {h:`Move stop to break-even once ahead, then trail ${on}`,
+    w:`Why: so a winner can't turn back into a loser — once safely ahead the worst case is a scratch, and the trail lets good runs run.`},
+   {h:`Keep the stop outside the spread ${on}`,
+    w:`Why: gold's spread is wide. A stop placed <b>inside</b> it gets hit instantly for nothing — this keeps a loss a real signal, not a fee.`},
+  ];
+  document.getElementById('rulesBody').innerHTML=rules.map(r=>`<div class="rule"><div class="rh">${r.h}</div><div class="why">${r.w}</div></div>`).join('');
+}
+// ---- coach ----
+function renderCoach(){
+  const c=(LOOP&&LOOP.ron_coach)||{};
+  document.getElementById('coachBody').innerHTML = c.note? `&ldquo;${esc(c.note)}&rdquo;` : '<span class="muted">Coach warms up once a few trades have closed — it reviews RON\'s real results every ~30 minutes.</span>';
+  document.getElementById('coachMeta').innerHTML = `${esc(c.model||'gpt-4o-mini')} · advisory${c.generated_at?' · '+nztTime(typeof c.generated_at==='number'?c.generated_at:Date.parse(c.generated_at)/1000)+' NZT':''} · demo account`;
+  // supervisor nudge (only if coach present)
+  document.getElementById('coachSup').innerHTML = c.note? `<div style="border:1.5px solid var(--border);border-left:6px solid var(--warn);border-radius:12px;background:var(--warn-bg);padding:14px 16px;margin-top:16px"><div style="font-weight:800;font-size:15px;color:var(--warn)">⚠️ Coach → RON · supervising</div><div style="font-size:15px;color:var(--ink);margin-top:6px;line-height:1.55">The coach also checks RON is <b>acting on new information</b> — if a briefing or a dollar move lands and RON goes quiet, it nudges RON and logs the reply.</div></div>` : '';
+}
+// ---- briefing ----
+function renderBrief(){
+  const sec=document.getElementById('secBrief'), ev=document.getElementById('secEvents'), mt=document.getElementById('secMeeting');
+  if(!BRIEF){
+    document.getElementById('briefWhen').textContent='warming up';
+    document.getElementById('briefHeadline').innerHTML='<span class="muted">The morning briefing and the next-24-hours read come online with the News &amp; Macro agent (hourly cron + 9am NZT brief). It\'s being wired now.</span>';
+    document.getElementById('briefGrid').innerHTML=''; document.getElementById('briefSess').innerHTML='';
+    document.getElementById('eventsBody').innerHTML='<div class="muted">Scheduled events (CPI, Fed, etc.) with if/then outcomes come online with the news agent.</div>';
+    return;
+  }
+  document.getElementById('briefWhen').textContent=`last read ${nztDateTime(BRIEF.as_of)} · refreshes hourly`;
+  document.getElementById('briefHeadline').innerHTML=esc(BRIEF.headline||'');
+  const blocks=[['💵 US Dollar (DXY)',BRIEF.usd],['🥇 Gold drivers',BRIEF.gold],['🌍 Geopolitical / news',BRIEF.geo]];
+  document.getElementById('briefGrid').innerHTML=blocks.map(([t,b])=>b?`<div class="bblock"><div class="bt">${t}${b.verdict?`<span class="verdict" style="background:${b.tone==='pos'?'var(--pos-bg)':b.tone==='neg'?'var(--neg-bg)':'var(--warn-bg)'};color:${b.tone==='pos'?'var(--pos)':b.tone==='neg'?'var(--neg)':'var(--warn)'}">${esc(b.verdict)}</span>`:''}</div><div class="body">${esc(b.body||'')}</div></div>`:'').join('');
+  const ss=BRIEF.sessions_24h||[];
+  document.getElementById('briefSess').innerHTML=`<div class="s24row hd"><div>Session (NZT)</div><div>Expected</div><div>What RON expects &amp; why</div></div>`+
+    ss.map(s=>`<div class="s24row"><div class="nm">${esc(s.session)}<span>${esc(s.window||'')}</span></div><div class="${s.tone==='pos'?'pos':s.tone==='neg'?'neg':'muted'}">${esc(s.expect||'')}</div><div>${esc(s.why||'')}</div></div>`).join('');
+  // events
+  const evs=BRIEF.events||[];
+  document.getElementById('eventsBody').innerHTML = evs.length? evs.map(e=>`<div class="evt"><div class="eh"><span class="nm">${esc(e.name)}</span><span class="tm">${esc(e.time||'')}</span><span class="imp" style="${e.impact==='MEDIUM'?'background:var(--warn-bg);color:var(--warn)':''}">${esc(e.impact||'HIGH IMPACT')}</span></div><div class="fc">${esc(e.forecast||'')}</div>${(e.above&&e.below)?`<div class="scn"><div class="s dn"><div class="lab">▲ If ABOVE (hot)</div><div class="d">${esc(e.above)}</div></div><div class="s up"><div class="lab">▼ If BELOW (soft)</div><div class="d">${esc(e.below)}</div></div></div>`:''}</div>`).join('') : '<div class="muted">No high-impact events flagged in the next 24h.</div>';
+}
+// ---- team meeting ----
+function renderMeeting(){
+  if(!MEET||!MEET.members){ document.getElementById('meetWhen').textContent='first meeting at 9:00 am NZT';
+    document.getElementById('meetConsensus').innerHTML='<div class="consensus" style="border-left-color:var(--warn);background:var(--warn-bg)">The daily 9am team meeting comes online with the news &amp; meeting module — RON, the coach and the agents will each post a call here, then get scored.</div>';
+    document.getElementById('meetBody').innerHTML=''; return; }
+  document.getElementById('meetWhen').textContent=`met ${nztTime(MEET.as_of)} NZT · reviewed the last sessions · next 9:00 am tomorrow`;
+  document.getElementById('meetConsensus').innerHTML=`<div class="consensus">${esc(MEET.consensus||'')}</div>`;
+  const lead=MEET.members.reduce((a,b)=>((b.acc_n?b.acc/b.acc_n:0)>(a.acc_n?a.acc/a.acc_n:0)?b:a),MEET.members[0]);
+  document.getElementById('meetBody').innerHTML=MEET.members.map(m=>{const wr=m.acc_n?Math.round(100*m.acc/m.acc_n):null;
+    return `<tr><td><b>${esc(m.ic||'')} ${esc(m.who)}</b>${m===lead&&wr!=null?' <span class="tag trend">⭐ most accurate</span>':''}</td>
+     <td class="${m.tone}"><b>${esc(m.call)}</b></td><td>${m.conf||'—'}%</td>
+     <td class="muted" style="font-size:14px">${esc(m.why||'')}</td>
+     <td>${wr==null?'<span class="muted">new</span>':`<span class="bar"><span style="width:${wr}%"></span></span><b class="${wr>=55?'pos':'neg'}">${m.acc}/${m.acc_n}</b>`}</td></tr>`;}).join('');
+}
+// ---- alerts ----
+function renderAlerts(){
+  const out=[];
+  const al=(LOOP&&LOOP.ron_alerts)||[];
+  al.slice(0,6).forEach(a=>{const side=(a.side||a.dir||'').toString().toLowerCase();
+    out.push({type:/buy|long/.test(side)?'buy':/sell|short/.test(side)?'sell':'watch',ic:'⚡',k:'RON ALERT',ttl:esc(a.text||a.title||a.symbol||'signal'),bd:esc(a.note||a.reason||'')});});
+  const ei=edgeInstr(),st=ei&&ei.structure;
+  if(st&&st.ready){
+    if(st.resistance&&st.price!=null&&(st.resistance.level-st.price)<(st.resistance.level*0.003))out.push({type:'watch',ic:'📈',k:'STRUCTURE',ttl:`Near resistance ${st.resistance.level}`,bd:'Price is close to the ceiling — watch for a tap &amp; rejection or a breakout.'});
+    if(st.support&&st.price!=null&&(st.price-st.support.level)<(st.support.level*0.003))out.push({type:'watch',ic:'📉',k:'STRUCTURE',ttl:`Near support ${st.support.level}`,bd:'Price is close to the floor — watch for a bounce or a breakdown.'});
+    if(/up/.test(st.trend||''))out.push({type:'buy',ic:'🔼',k:'TREND',ttl:'Uptrend intact',bd:'Structure is trending up — RON favours longs while support holds.'});
+    else if(/down/.test(st.trend||''))out.push({type:'sell',ic:'🔽',k:'TREND',ttl:'Downtrend intact',bd:'Structure is trending down — RON favours shorts while resistance holds.'});
+  }
+  const pf=(LOOP&&LOOP.ron_pattern_feed&&LOOP.ron_pattern_feed.feed)||[];
+  const openP=pf.find(f=>f.status==='open');
+  if(openP)out.push({type:'watch',ic:'🔶',k:'PATTERN FORMING',ttl:esc(openP.pattern)+' @ '+openP.price,bd:esc(openP.note||'')+' — RON is tracking it.'});
+  if(BRIEF&&BRIEF.usd)out.push({type:'info',ic:'💵',k:'US DOLLAR',ttl:esc(BRIEF.usd.verdict||'US dollar watch'),bd:esc((BRIEF.usd.body||'').slice(0,160))});
+  if(!out.length)out.push({type:'info',ic:'🟢',k:'ALL QUIET',ttl:'No alerts right now',bd:'RON is watching every session. Alerts pop up here — and as pop-ups that stay until you close them — the moment a setup, structure test or dollar move appears.'});
+  document.getElementById('alerts').innerHTML=out.map(a=>`<div class="alert ${a.type}"><span class="ic">${a.ic}</span><div><div class="ttl"><span class="k">${a.k}</span>${a.ttl}</div><div class="bd">${a.bd}</div></div></div>`).join('');
+  renderToasts(out.filter(a=>a.type!=='info'||a.k==='US DOLLAR').slice(0,4));
+}
+let TOASTS_SHOWN=false;
+function renderToasts(items){
+  if(TOASTS_SHOWN||!items.length)return; TOASTS_SHOWN=true;
+  const tc=document.createElement('div');tc.className='toasts';
+  tc.innerHTML=`<div class="toast-hint">▾ pop-ups stay until you close them · and update as conditions change</div>`+items.map((t,i)=>`
+    <div class="toast ${t.type}" id="toast${i}"><button class="x" onclick="document.getElementById('toast${i}').remove()">×</button>
+     <div class="tt"><span class="k">${t.k}</span>${t.ttl}</div><div class="tb">${t.bd}</div><span class="stamp">${nztNow()} NZT</span></div>`).join('');
+  document.body.appendChild(tc);
+}
+// ---- controls ----
+async function ctl(action,confirmMsg){
+  if(confirmMsg&&!confirm(confirmMsg))return;
+  const m=document.getElementById('ctlMsg'); m.textContent='…';
+  try{const r=await fetch('/control/'+action,{cache:'no-store'});const j=await r.json();m.textContent=(j&&j.msg)?('✓ '+j.msg):'done';}
+  catch(e){m.textContent='could not reach the server';}
+}
+window.ctl=ctl;
+
+// ---- collapsible + tiles ----
+const TILES={
+ "today's team meeting":[["team call","teal"],["scored daily","pos"],["who's right","info"]],
+ "today's gold briefing":[["next 24h","teal"],["US dollar","info"],["gold read","pos"]],
+ "scheduled events":[["if / then","info"],["be ready","warn"]],
+ "how ron trades":[["5 sessions","teal"],["high-prob only","pos"],["self-learning","teal"]],
+ "agents at work":[["6 live","pos"],["nothing idle","pos"],["watchdog ON","teal"]],
+ "the account":[["live","pos"],["real trades","teal"]],
+ "alerts":[["live","warn"],["pop-ups","info"]],
+ "what's happening":[["market read","teal"],["NZT stamped","info"]],
+ "ron's playbook":[["every session","teal"],["high-prob","pos"]],
+ "today's sessions":[["walk-through","teal"]],
+ "when gold actually moves":[["by NZT hour","teal"]],
+ "pattern feed":[["live","pos"],["graded","info"]],
+ "patterns that pay":[["hit-rates","teal"]],
+ "best sessions":[["every session","teal"]],
+ "ron's current rules":[["self-set","teal"],["with reasons","info"]],
+ "chatgpt coach":[["advisory","info"],["supervisor","warn"]],
+ "controls":[["you're in control","teal"]],
+};
+function tilesFor(t){const k=Object.keys(TILES).find(k=>t.toLowerCase().includes(k));return k?TILES[k]:[];}
+function makeCollapsible(){
+ document.querySelectorAll('.sec, .brief, .events').forEach(el=>{
+  if(el.classList.contains('panel'))return; const eb=el.querySelector('.eyebrow'); if(!eb)return;
+  el.classList.add('panel'); const h2=el.querySelector('h2.sh'); const tiles=tilesFor(eb.textContent);
+  const head=document.createElement('div');head.className='sechead';
+  if(tiles.length){const tr=document.createElement('div');tr.className='ctiles';tr.innerHTML=tiles.map(t=>`<span class="ctile ${t[1]}">${t[0]}</span>`).join('');head.appendChild(tr);}
+  const title=document.createElement('div');title.className='ctitle';const tl=document.createElement('div');tl.appendChild(eb);if(h2)tl.appendChild(h2);
+  const arw=document.createElement('div');arw.className='arw';arw.textContent='▾';title.appendChild(tl);title.appendChild(arw);
+  const body=document.createElement('div');body.className='cbody';while(el.firstChild){body.appendChild(el.firstChild);}
+  head.appendChild(title);el.appendChild(head);el.appendChild(body);
+  title.addEventListener('click',()=>el.classList.toggle('closed'));
+ });
+}
+
+// ============ render all ============
+let TAB='all';
+function renderAll(){
+  renderBanner();renderNowbar();renderWeekend();renderMeeting();renderBrief();
+  renderAgents();renderAccount();renderAlerts();renderMnow();renderPlay();renderDay();
+  renderHeat();renderFeed();renderPays();renderSessions(TAB);renderRules();renderCoach();
+  makeCollapsible();
+  document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');TAB=t.dataset.p;renderSessions(TAB);});
+}
+boot(); setInterval(boot, 15000);
+</script>
+</body>
+</html>

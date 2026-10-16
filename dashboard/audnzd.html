@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUD/NZD · Agent RON</title>
+<style>
+:root{
+  --bg:#f4f7f6; --panel:#ffffff; --ink:#0b0d0c; --border:#111317; --soft:#dfe6e4; --soft2:#eef3f1;
+  --muted:#53605d; --dim:#879591; --teal:#007d7d; --teal2:#00a3a3; --teal-bg:#e3f6f6;
+  --pos:#0a8f5c; --pos-bg:#e4f6ee; --neg:#d12a3a; --neg-bg:#fbe7e9; --warn:#a85f00; --warn-bg:#fbf0dd;
+  --time:#0a5fc2; --time-bg:#e7f0fc; --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 var(--mono);padding:22px;max-width:1240px;margin:0 auto}
+.banner{background:var(--teal-bg);border:1.5px solid var(--border);color:var(--teal-d);border-radius:12px;padding:12px 18px;font-size:14px;margin-bottom:20px;text-align:center}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.top h1{font-size:32px;margin:0;letter-spacing:2px}
+.tick{width:38px;height:38px;border-radius:10px;background:#111317;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+.pill{border:1.5px solid var(--border);border-radius:999px;padding:7px 16px;color:var(--ink);font-size:15px;background:#fff;text-decoration:none}
+.pill.live{background:var(--teal-bg);border-color:var(--teal-d);color:var(--teal-d);font-weight:700}
+.pill.adv{background:var(--warn-bg);border-color:var(--warn);color:var(--warn);font-weight:700}
+.nowbar{color:var(--muted);font-size:15px;margin:0 0 22px 2px}.nowbar b{color:var(--time)}
+.sec{background:var(--panel);border:1.5px solid var(--border);border-radius:18px;padding:24px 26px;margin-bottom:22px}
+.eyebrow{font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--teal-d);margin-bottom:6px;font-weight:700}
+h2.sh{font-size:24px;margin:0 0 8px}
+.explain{font-size:15px;color:var(--muted);margin:0 0 18px;line-height:1.6;max-width:98ch}.explain b{color:var(--ink)}
+.nzt{color:var(--time);font-weight:700}.pos{color:var(--pos)}.neg{color:var(--neg)}.warnc{color:var(--warn)}.muted{color:var(--muted)}
+.mnow{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid var(--soft)}
+.mrow .k{color:var(--muted);font-size:15px}.mrow .kw{font-weight:800}
+.mrow .v{font-size:21px;font-weight:800;text-align:right}.mrow .v .stamp{display:block;font-size:13px;color:var(--time);font-weight:600;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{text-align:left;color:var(--muted);font-weight:700;font-size:13px;letter-spacing:.5px;padding:11px;border-bottom:2px solid var(--border);text-transform:uppercase}
+td{padding:14px 11px;border-bottom:1px solid var(--soft);vertical-align:top}tr:last-child td{border-bottom:none}
+.subm{display:block;font-size:13px;color:var(--muted);margin-top:4px}.sub2{display:block;font-size:13px;color:var(--time);margin-top:4px;font-weight:600}
+.patt{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--soft)}.patt:last-child{border-bottom:none}
+.dot{width:12px;height:12px;border-radius:50%;margin-top:8px;flex:none}.patt .line1{font-size:17px}.patt .meta{font-size:14px;color:var(--muted);margin-top:5px}
+.pat{border-bottom:1.5px dotted var(--teal-d);cursor:help;position:relative;font-weight:700}
+.pat .hint{font-size:11px;color:var(--teal-d);vertical-align:super}
+.pat .tip{display:none;position:absolute;left:0;bottom:135%;z-index:40;width:300px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.18);font-weight:400}
+.pat:hover .tip{display:block}.pat .tip .nm{font-weight:800;color:var(--teal-d)}.pat .tip .d{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.5}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+.bblock{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px}
+.bblock .bt{font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bblock .verdict{font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px}
+.bblock .body{font-size:14px;color:var(--muted);line-height:1.55}.bblock .body b{color:var(--ink)}
+.headline{font-size:21px;font-weight:800;line-height:1.45;margin:10px 0 18px;max-width:95ch}
+.sess24{border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.s24row{display:grid;grid-template-columns:200px 120px 1fr;gap:14px;padding:12px 16px;border-bottom:1px solid var(--soft);align-items:baseline;font-size:14px}
+.s24row:last-child{border-bottom:none}.s24row.hd{background:var(--soft2);font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.s24row .nm{font-weight:800}.s24row .nm span{display:block;font-size:12px;color:var(--time);font-weight:600}
+.evt{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px}.evt:last-child{margin-bottom:0}
+.evt .eh{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.evt .eh .nm{font-weight:800;font-size:16px}.evt .eh .tm{color:var(--time);font-weight:700;font-size:14px}
+.evt .eh .imp{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--neg-bg);color:var(--neg)}
+.evt .fc{font-size:14px;color:var(--muted);margin:6px 0 12px}
+.scn{display:grid;grid-template-columns:1fr 1fr;gap:12px}.scn .s{border-radius:12px;padding:12px 14px;border:1.5px solid}
+.scn .s.up{border-color:var(--pos);background:var(--pos-bg)}.scn .s.dn{border-color:var(--neg);background:var(--neg-bg)}
+.scn .s .lab{font-weight:800;font-size:14px}.scn .s.up .lab{color:var(--pos)}.scn .s.dn .lab{color:var(--neg)}.scn .s .d{font-size:13.5px;color:var(--ink);margin-top:5px;line-height:1.5}
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.agent{border:1.5px solid var(--border);border-radius:14px;padding:16px 18px}
+.agent .ah{font-weight:800;font-size:16px;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.agent .state{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:auto;background:var(--pos-bg);color:var(--pos)}
+.agent .now{font-size:14px;color:var(--ink);margin:8px 0 6px;line-height:1.5}.agent .nx{font-size:13px;color:var(--muted);line-height:1.5}.agent .nx b{color:var(--teal-d)}
+.decide{border:2px solid var(--border);border-radius:16px;background:linear-gradient(180deg,var(--teal-bg),#fff);padding:20px 22px}
+.decide .dh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.decide .brain{width:34px;height:34px;border-radius:9px;background:#111317;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:18px}
+.decide .verdict{font-size:22px;font-weight:800}.decide .lk{margin-left:auto;text-align:right}.decide .lk .pct{font-size:32px;font-weight:800;line-height:1}.decide .lk .lb{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.decide .conf{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}.decide .chip{font-size:13px;border-radius:999px;padding:4px 11px;border:1.5px solid;font-weight:700}
+.decide .chip.y{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}.decide .chip.n{border-color:var(--neg);color:var(--neg);background:var(--neg-bg)}.decide .chip.w{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.decide .say{font-size:15px;color:var(--ink);line-height:1.55}
+.tag{font-size:12px;border-radius:999px;padding:3px 11px;font-weight:700;border:1.5px solid}.tag.trend{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}.tag.chop{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.heat{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:6px}.hcell{aspect-ratio:1;border-radius:4px;border:1px solid var(--soft);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.hhours{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:5px;font-size:10px;color:var(--muted);text-align:center}
+.weekend{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--border);border-left:7px solid var(--warn);border-radius:14px;background:var(--warn-bg);padding:14px 18px;margin-bottom:22px}
+.weekend .ic{font-size:22px}.weekend .t{font-weight:800;font-size:16px;color:var(--warn)}.weekend .b{font-size:14px;color:var(--ink);margin-top:5px;line-height:1.5}
+.ctitle{display:flex;align-items:flex-start;gap:14px;cursor:pointer;user-select:none}.ctitle>div:first-child{flex:1}.ctitle .eyebrow{margin-bottom:4px}.ctitle h2.sh{margin:0}
+.ctitle .arw{font-size:18px;color:var(--muted);border:1.5px solid var(--border);border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex:none;transition:transform .2s;background:#fff}
+.panel.closed .arw{transform:rotate(-90deg)}.panel.closed .cbody{display:none}
+.ctiles{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.ctile{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;border:1.5px solid}
+.ctile.pos{border-color:var(--pos);color:var(--pos);background:var(--pos-bg)}.ctile.neg{border-color:var(--neg);color:var(--neg);background:var(--neg-bg)}.ctile.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}.ctile.teal{border-color:var(--teal-d);color:var(--teal-d);background:var(--teal-bg)}.ctile.info{border-color:var(--time);color:var(--time);background:var(--time-bg)}
+.foot{font-size:13px;color:var(--dim);text-align:center;padding:4px 0 10px}
+@media(max-width:980px){.agents,.bgrid{grid-template-columns:1fr}.mnow{grid-template-columns:1fr}.scn{grid-template-columns:1fr}.s24row{grid-template-columns:1fr;gap:3px}.s24row.hd{display:none}.heat .hcell{font-size:0}}
+</style>
+</head>
+<body>
+  <div class="banner" id="banner">● AUD/NZD · analysis only — RON reads this pair to guide you; it does not place AUDNZD trades.</div>
+  <div class="top">
+    <span class="tick">✓</span><h1>AUD / NZD</h1>
+    <span class="pill adv">◆ ANALYSIS ONLY · no trading</span>
+    <a class="pill" href="/">← Dashboard (Gold)</a>
+  </div>
+  <div class="nowbar" id="nowbar">All times New Zealand (NZT).</div>
+
+  <div id="weekendWrap"></div>
+
+  <!-- BRIEFING -->
+  <div class="sec" id="secBrief">
+    <div class="eyebrow">AUD + NZD briefing · the next 24 hours</div>
+    <h2 class="sh">Economic &amp; news read — both sides of the cross</h2>
+    <div class="explain">RON's macro agent watches <b>both countries</b>: the RBA vs RBNZ rate path, Australian data (CPI, jobs, GDP, trade, China demand), New Zealand data (CPI, jobs, GDP, dairy/GDT), politics, and the risk flows between them. <b>Up = AUD-favoured (pair up); down = NZD-favoured (pair down).</b></div>
+    <div class="headline" id="briefHeadline"></div>
+    <div class="bgrid" id="briefGrid"></div>
+  </div>
+
+  <!-- SCHEDULED EVENTS -->
+  <div class="sec" id="secEvents">
+    <div class="eyebrow">Scheduled AU / NZ events · be ready (if / then)</div>
+    <h2 class="sh">Known announcements — and what they'd do to AUDNZD</h2>
+    <div class="explain">Real calendar, AU &amp; NZ only. Each is pre-framed both ways so you know the reaction the moment it prints.</div>
+    <div id="eventsBody"></div>
+  </div>
+
+  <!-- RON READ -->
+  <div class="sec">
+    <div class="eyebrow">RON's read · advisory</div>
+    <h2 class="sh">Where RON leans on the pair (it won't trade it)</h2>
+    <div class="explain">The analysis agents fused into one lean, with a confidence. This is a <b>read to guide your own trade</b> — RON does not execute AUDNZD.</div>
+    <div id="read"></div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="sec">
+    <div class="eyebrow">Agents watching AUDNZD</div>
+    <h2 class="sh">Each agent's read on the pair</h2>
+    <div class="explain">The same specialist agents as gold, pointed at AUDNZD — advisory only.</div>
+    <div class="agents" id="agents"></div>
+  </div>
+
+  <!-- MARKET READ -->
+  <div class="sec">
+    <div class="eyebrow">What's happening right now</div>
+    <h2 class="sh">The market read — NZT-stamped</h2>
+    <div class="explain">Green = up/bullish for the pair, red = down. <b>Resistance</b> (ceiling) red; <b>support</b> (floor) green.</div>
+    <div class="mnow" id="mnow"></div>
+  </div>
+
+  <!-- PATTERN FEED -->
+  <div class="sec">
+    <div class="eyebrow">Pattern feed · live</div>
+    <h2 class="sh">Every pattern RON spots on AUDNZD</h2>
+    <div class="explain">Printed with the <span class="nzt">NZT time</span>, then graded on follow-through. <b>Hover any pattern name</b> to see it drawn.</div>
+    <div id="feed"></div>
+  </div>
+
+  <!-- PATTERNS THAT PAY -->
+  <div class="sec">
+    <div class="eyebrow">Patterns that pay</div>
+    <h2 class="sh">Which patterns follow through on this pair</h2>
+    <div class="explain"><b>Hover any pattern name</b> to see it drawn. More times seen = more trustworthy.</div>
+    <table><thead><tr><th>Pattern</th><th>Times seen</th><th>Worked</th><th>Hit-rate</th><th>Best session</th></tr></thead><tbody id="paysBody"></tbody></table>
+  </div>
+
+  <!-- SESSION / TIME EDGES -->
+  <div class="sec">
+    <div class="eyebrow">Session &amp; time edges — AUDNZD</div>
+    <h2 class="sh">When the pair tends to move, and which way</h2>
+    <div class="explain">From the pair's own candle history: each session's directional lean (% of hours that closed up), the average move, and the sample size. Builds as history accumulates.</div>
+    <table><thead><tr><th>Session (NZT)</th><th>Lean</th><th>% hours up</th><th>Avg hourly move</th><th>Confidence</th></tr></thead><tbody id="sessBody"></tbody></table>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="sec">
+    <div class="eyebrow">When AUDNZD moves — by NZT hour</div>
+    <h2 class="sh">The 24-hour activity clock</h2>
+    <div class="explain">Darker teal = the pair moves more that NZT hour (avg range).</div>
+    <div class="heat" id="heat"></div><div class="hhours" id="hhours"></div>
+  </div>
+
+  <div class="foot">Analysis only — RON does not trade AUDNZD. Real calendar + candle data; the AI narrative uses your OpenAI key. Figures sharpen as history builds. Not financial advice.</div>
+
+<script>
+let D=window.__TEST_D||null;
+async function boot(){ try{const r=await fetch('/results/audnzd.json',{cache:'no-store'});if(r.ok)D=await r.json();}catch(e){} try{render();}catch(e){console.error(e);} }
+const OFF=()=> (D&&D.nzt_offset)||13;
+function nztTime(ep){if(!ep)return '—';const d=new Date(ep*1000+OFF()*3600000);let h=d.getUTCHours(),m=d.getUTCMinutes(),ap=h>=12?'pm':'am';h=h%12||12;return `${h}:${String(m).padStart(2,'0')} ${ap}`;}
+function nztDateTime(ep){if(!ep)return '—';const d=new Date(ep*1000+OFF()*3600000);const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${dn[d.getUTCDay()]} ${d.getUTCDate()} ${mo[d.getUTCMonth()]}, ${nztTime(ep)} NZT`;}
+function nztNow(){return nztTime(Date.now()/1000);}
+function nztDOW(){return new Date(Date.now()+OFF()*3600000).getUTCDay();}
+function ago(s){if(s==null)return '';s=Math.max(0,Math.round(s));if(s<60)return s+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const SWIN={"Sydney":"9:00 am – 6:00 pm","Tokyo":"12:00 pm – 6:00 pm","Tokyo/Asian":"12:00 pm – 6:00 pm","London":"8:00 pm – 4:30 am","London/NY overlap":"2:30 am – 5:00 am","New York":"2:30 am – 9:00 am","Off-hours":"—"};
+const swin=s=>SWIN[s]||'';
+const PAT={"double bottom":{d:"Two lows at a similar level — a 'W'. Often turns up.",svg:"5,20 18,45 30,25 42,45 55,20"},"double top":{d:"Two highs at a similar level — an 'M'. Often turns down.",svg:"5,45 18,20 30,40 42,20 55,45"},"bull flag":{d:"Push up then tight pause — often continues up.",svg:"5,50 22,15 30,22 40,30 48,25 55,33"},"bear flag":{d:"Drop then tight pause — often continues down.",svg:"5,15 22,50 30,43 40,35 48,40 55,32"},"breakout up":{d:"Breaks above the range — momentum up.",svg:"5,40 15,38 25,41 35,39 45,18 55,14"},"breakout down":{d:"Breaks below the range — momentum down.",svg:"5,24 15,26 25,23 35,25 45,46 55,50"},"possible head & shoulders":{d:"Three highs, middle tallest — topping shape.",svg:"5,45 15,30 25,40 30,18 35,40 45,30 55,45"},"possible inverse H&S":{d:"Three lows, middle deepest — bottoming shape.",svg:"5,20 15,35 25,25 30,47 35,25 45,35 55,20"}};
+function patSpan(n){if(!n)return '<span class="muted">structure</span>';const p=PAT[n]||{d:"A recurring price shape.",svg:"5,30 55,30"};return `<span class="pat">${esc(n)}<span class="hint">⌕</span><span class="tip"><span class="nm">${esc(n)}</span><svg width="100%" height="64" viewBox="0 0 60 60" style="margin-top:8px"><polyline points="${p.svg}" fill="none" stroke="#007d7d" stroke-width="2.5"/></svg><div class="d">${p.d}</div></span></span>`;}
+
+function render(){
+  if(!D){document.getElementById('banner').innerHTML='● connecting to the AUDNZD feed…';return;}
+  const b=document.getElementById('banner'); b.innerHTML=`● AUD/NZD · analysis only · ${D.ready?('price '+(D.price??'—')):'warming up'} · updated ${nztTime(D.as_of)} NZT · RON does not trade this pair`;
+  document.getElementById('nowbar').innerHTML=`All times <b>NZT</b>. Right now <b>${nztNow()} NZT</b>. Session: <b>${esc(D.session||'—')} (${swin(D.session)} NZT)</b>.`;
+  renderWeekend();renderBrief();renderRead();renderAgents();renderMnow();renderFeed();renderPays();renderSess();renderHeat();makeCollapsible();
+}
+function renderWeekend(){const dow=nztDOW();let h='';
+  if(dow===6||dow===0)h=`<div class="weekend"><span class="ic">📅</span><div><div class="t">Weekend — FX closed, reopens Monday</div><div class="b">AUDNZD reopens <b>Monday ~7:00 am NZT</b>. Weekend news in either country can <b>gap the open</b> — the briefing below covers what to watch.</div></div></div>`;
+  else if(dow===5)h=`<div class="weekend"><span class="ic">📅</span><div><div class="t">Weekend ahead</div><div class="b">FX closes Saturday ~7am NZT and reopens Monday. Weekend AU/NZ news can gap the open.</div></div></div>`;
+  document.getElementById('weekendWrap').innerHTML=h;}
+function renderBrief(){const B=D.briefing||{};
+  document.getElementById('briefHeadline').innerHTML = B.headline?esc(B.headline):'<span class="muted">The AUD+NZD briefing comes online on the hourly cron (uses your OpenAI key).</span>';
+  const blocks=[['🇦🇺 Australia (AUD)',B.au],['🇳🇿 New Zealand (NZD)',B.nz],['⚖️ The cross',B.cross]];
+  document.getElementById('briefGrid').innerHTML=blocks.map(([t,x])=>x?`<div class="bblock"><div class="bt">${t}${x.verdict?`<span class="verdict" style="background:${x.tone==='pos'?'var(--pos-bg)':x.tone==='neg'?'var(--neg-bg)':'var(--warn-bg)'};color:${x.tone==='pos'?'var(--pos)':x.tone==='neg'?'var(--neg)':'var(--warn)'}">${esc(x.verdict)}</span>`:''}</div><div class="body">${esc(x.body||'')}</div></div>`:`<div class="bblock"><div class="bt">${t}</div><div class="body muted">warming up…</div></div>`).join('');
+  const evs=(B.events||[]);
+  document.getElementById('eventsBody').innerHTML = evs.length? evs.map(e=>`<div class="evt"><div class="eh"><span class="nm">${esc(e.name)}</span><span class="tm">${esc(e.time||'')}</span><span class="imp" style="${e.impact==='MEDIUM'?'background:var(--warn-bg);color:var(--warn)':''}">${esc(e.impact||'')}</span></div><div class="fc">${esc(e.forecast||'')}</div>${(e.above&&e.below)?`<div class="scn"><div class="s up"><div class="lab">▲ Hot print</div><div class="d">${esc(e.above)}</div></div><div class="s dn"><div class="lab">▼ Soft print</div><div class="d">${esc(e.below)}</div></div></div>`:''}</div>`).join('') : '<div class="muted">No high-impact AU/NZ events in the next 24h (or calendar warming up).</div>';
+}
+function renderRead(){const f=D.fusion;
+  let dir=f&&f.direction>0?'up':f&&f.direction<0?'down':'flat';
+  const verd=dir==='up'?'LEAN LONG · AUD over NZD':dir==='down'?'LEAN SHORT · NZD over AUD':'NO CLEAR LEAN';
+  const lk=f&&f.likelihood!=null?f.likelihood:null;
+  const chips=((f&&f.contributions)||[]).map(c=>`<span class="chip ${c.dir>0?'y':c.dir<0?'n':'w'}">${c.dir>0?'▲':c.dir<0?'▼':'~'} ${esc(c.who)}</span>`).join('')||'<span class="muted">agents warming up…</span>';
+  document.getElementById('read').innerHTML=`<div class="decide"><div class="dh"><span class="brain">🧠</span><span>RON · advisory read</span><span class="verdict ${dir==='up'?'pos':dir==='down'?'neg':'muted'}">${verd}</span><span class="lk"><div class="pct ${lk!=null?(lk>=55?'pos':'neg'):'muted'}">${lk!=null?lk+'%':'—'}</div><div class="lb">lean confidence</div></span></div><div class="conf">${chips}</div><div class="say">A guide for your own trade — RON does not place AUDNZD orders. Confidence sharpens as the pair's history builds.</div></div>`;
+}
+function renderAgents(){const mtf=D.multitf,pat=D.pattern,vol=D.volatility,st=D.structure,tq=D.trend&&D.trend.current,B=D.briefing||{};
+  const card=(ic,nm,now,nx)=>`<div class="agent"><div class="ah">${ic} ${nm}<span class="state">ACTIVE</span></div><div class="now">${now}</div><div class="nx">${nx}</div></div>`;
+  let h='';
+  h+=card('📈','Trend agent', mtf?`Multi-timeframe: <b>${esc(mtf.state||'—')}</b>. ${esc(mtf.summary||'')}`+(tq?`<br><b>${tq.dir==='up'?'▲ up':'▼ down'} since ${esc(tq.since_nzt||'')} NZT</b> · quality <b>${tq.quality!=null?tq.quality+'%':'learning'}</b> · vol ${tq.rel_vol!=null?tq.rel_vol+'×':'—'}`:''):'Reading 15m/30m/1h alignment.', `Learning when real trends form${D.trend&&D.trend.graded?` — ${D.trend.graded} graded`:''}.`);
+  h+=card('🧩','Pattern agent', pat?`<b>${esc(pat.structure||'—')}</b>${pat.pattern?`, ${esc(pat.pattern)}`:''}. ${esc(pat.note||'')}`:'Scanning for chart patterns.', `Tracking ${(D.pattern_feed&&D.pattern_feed.open)||0} open · ${(D.pattern_feed&&D.pattern_feed.graded)||0} graded.`);
+  h+=card('🏛️','Structure agent', (st&&st.ready)?`Resistance <b>${st.resistance?st.resistance.level:'—'}</b> / support <b>${st.support?st.support.level:'—'}</b> · trend ${esc(st.trend||'—')}.`:'Mapping support &amp; resistance.', 'Flags taps &amp; breaks.');
+  h+=card('🌊','Volatility agent', vol?`<b>${esc(vol.regime||'—')}</b> · range ${vol.range_ratio}× normal.`:'Watching activity.', 'Bursts often precede moves.');
+  h+=card('🌍','News &amp; Macro agent', B.as_of?`Last read <b>${nztDateTime(B.as_of)}</b>. ${esc((B.cross&&B.cross.verdict)||'')}`:'Scanning AU + NZ news. <span class="warnc">First read on the hourly cron.</span>', 'RBA vs RBNZ, both countries\' data, politics, dairy, China.');
+  document.getElementById('agents').innerHTML=h;
+}
+function renderMnow(){const st=D.structure;const el=document.getElementById('mnow');
+  if(!st||!st.ready){el.innerHTML='<div class="mrow"><span class="k">Market read</span><span class="v muted">warming up — needs more candle history</span></div>';return;}
+  const up=/up/.test(st.trend||''),dn=/down/.test(st.trend||'');const tq=D.trend&&D.trend.current;
+  const tstamp=st.trend_since?`started ${nztTime(st.trend_since)} NZT`:`as of ${nztTime(D.as_of)} NZT`;
+  const bstamp=st.bos_at?`broke ${nztTime(st.bos_at)} NZT`:`as of ${nztTime(D.as_of)} NZT`;
+  let h='';
+  h+=`<div class="mrow"><span class="k kw">Trend</span><span class="v ${up?'pos':dn?'neg':''}">${up?'UP ▲':dn?'DOWN ▼':esc(st.trend||'—')}<span class="stamp">${tstamp}</span></span></div>`;
+  if(st.bos)h+=`<div class="mrow"><span class="k kw">Structure break</span><span class="v ${/up|bull/i.test(st.bos)?'pos':/down|bear/i.test(st.bos)?'neg':''}">${esc(st.bos)}<span class="stamp">${bstamp}</span></span></div>`;
+  if(st.resistance)h+=`<div class="mrow"><span class="k kw neg">Resistance</span><span class="v neg">${st.resistance.level}<span class="stamp">ceiling${st.resistance.set_at?' · set '+nztTime(st.resistance.set_at)+' NZT':''}</span></span></div>`;
+  if(st.support)h+=`<div class="mrow"><span class="k kw pos">Support</span><span class="v pos">${st.support.level}<span class="stamp">floor${st.support.set_at?' · set '+nztTime(st.support.set_at)+' NZT':''}</span></span></div>`;
+  if(st.price!=null)h+=`<div class="mrow"><span class="k kw">Price</span><span class="v">${st.price}<span class="stamp">as of ${nztTime(D.as_of)} NZT</span></span></div>`;
+  if(D.rel_vol!=null)h+=`<div class="mrow"><span class="k kw">Volume</span><span class="v ${D.rel_vol>=1.5?'pos':''}">${D.rel_vol}×<span class="stamp">vs recent average${D.rel_vol>=1.5?' · surge':''}</span></span></div>`;
+  if(tq)h+=`<div class="mrow"><span class="k kw">Trend quality</span><span class="v ${tq.quality!=null?(tq.quality>=55?'pos':'neg'):''}">${tq.quality!=null?tq.quality+'%':'learning'}<span class="stamp">${esc(tq.dir||'')} since ${esc(tq.since_nzt||'')} NZT</span></span></div>`;
+  el.innerHTML=h;
+}
+function renderFeed(){const feed=(D.pattern_feed&&D.pattern_feed.feed)||[];
+  if(!feed.length){document.getElementById('feed').innerHTML='<div class="muted">No patterns recorded on AUDNZD yet — they print here as RON spots them.</div>';return;}
+  document.getElementById('feed').innerHTML=feed.slice(0,20).map(f=>{const col=f.status==='win'?'var(--pos)':f.status==='loss'?'var(--neg)':'var(--warn)';
+    const grade=f.status==='open'?'<span class="warnc">open</span>':`<span class="${(f.pts||0)>=0?'pos':'neg'}">${f.status==='win'?'FOLLOWED':'FADED'} ${(f.pts||0)>=0?'+':''}${f.pts}</span>`;
+    const t=f.t||(Date.now()/1000-(f.ago_s||0));
+    return `<div class="patt"><span class="dot" style="background:${col}"></span><div><div class="line1">${patSpan(f.pattern)} @ ${f.price} — ${grade}</div><div class="meta">printed <span class="nzt">${nztTime(t)} NZT</span> (${ago(f.ago_s)} ago) · 3m · ${esc(f.session||'')} session<br>${esc(f.note||'')}</div></div></div>`;}).join('');
+}
+function renderPays(){const pays=(D.pattern_feed&&D.pattern_feed.pays)||[];
+  if(!pays.length){document.getElementById('paysBody').innerHTML='<tr><td colspan="5" class="muted">No graded patterns yet — builds over the coming sessions.</td></tr>';return;}
+  document.getElementById('paysBody').innerHTML=pays.map(p=>{const wr=Math.round((p.win_rate!=null?p.win_rate*(p.win_rate<=1?100:1):100*p.wins/Math.max(1,p.n)));
+    return `<tr><td>${patSpan(p.pattern)}</td><td>${p.n} times</td><td>${p.wins}</td><td><b class="${wr>=55?'pos':'neg'}">${wr}%</b></td><td class="pos">${esc(p.best_session||'—')}</td></tr>`;}).join('');
+}
+function renderSess(){const rows=D.sessions||[];
+  if(!rows.length){document.getElementById('sessBody').innerHTML='<tr><td colspan="5" class="muted">Session edges build as candle history accumulates.</td></tr>';return;}
+  document.getElementById('sessBody').innerHTML=rows.map(r=>{const up=r.dir==='up';
+    return `<tr><td><b>${esc(r.session)}</b><span class="subm">${swin(r.session)} NZT</span></td><td class="${up?'pos':'neg'}">${up?'AUD ▲':'NZD ▼'}</td><td>${r.pct_up}%</td><td class="${(r.mean||0)>=0?'pos':'neg'}">${(r.mean||0)>=0?'+':''}${r.mean}</td><td class="muted">${esc(r.conf||'')} (${r.n})</td></tr>`;}).join('');
+}
+function renderHeat(){const hm=D.heatmap;const el=document.getElementById('heat'),hh=document.getElementById('hhours');
+  if(!hm||!hm.matrix||!hm.matrix.length){el.innerHTML='<div class="muted" style="grid-column:1/-1">Heatmap builds as history accumulates.</div>';hh.innerHTML='';return;}
+  const utc=new Array(24).fill(0),cnt=new Array(24).fill(0);
+  hm.matrix.forEach(row=>{if(!row)return;row.forEach((v,h)=>{if(v){utc[h]+=v;cnt[h]++;}});});
+  const H=new Array(24).fill(0);for(let n=0;n<24;n++){const u=((n-OFF())%24+24)%24;H[n]=cnt[u]?utc[u]/cnt[u]:0;}
+  const mx=Math.max(...H,0.0001);const col=v=>{const t=v/mx,r=Math.round(215-215*t),g=Math.round(239-114*t),b=Math.round(237-112*t);return `rgb(${r},${g},${b})`;};
+  el.innerHTML=H.map((v,i)=>`<div class="hcell" title="${i}:00 NZT" style="background:${col(v)};color:${v/mx>0.5?'#fff':'#0b0d0c'}">${v?v.toFixed(1):''}</div>`).join('');
+  hh.innerHTML=H.map((v,i)=>`<div>${i}</div>`).join('');
+}
+const TILES={"aud + nzd briefing":[["RBA vs RBNZ","teal"],["both countries","info"]],"scheduled au":[["if / then","info"]],"ron's read":[["advisory","warn"],["no trade","warn"]],"agents watching":[["5 agents","teal"]],"what's happening":[["NZT stamped","info"]],"pattern feed":[["live","pos"]],"patterns that pay":[["hit-rates","teal"]],"session & time":[["candle edges","teal"]],"when audnzd moves":[["by NZT hour","teal"]]};
+function tilesFor(t){const k=Object.keys(TILES).find(k=>t.toLowerCase().includes(k));return k?TILES[k]:[];}
+function makeCollapsible(){document.querySelectorAll('.sec').forEach(el=>{if(el.classList.contains('panel'))return;const eb=el.querySelector('.eyebrow');if(!eb)return;el.classList.add('panel');const h2=el.querySelector('h2.sh');const tiles=tilesFor(eb.textContent);const head=document.createElement('div');if(tiles.length){const tr=document.createElement('div');tr.className='ctiles';tr.innerHTML=tiles.map(t=>`<span class="ctile ${t[1]}">${t[0]}</span>`).join('');head.appendChild(tr);}const title=document.createElement('div');title.className='ctitle';const tl=document.createElement('div');tl.appendChild(eb);if(h2)tl.appendChild(h2);const arw=document.createElement('div');arw.className='arw';arw.textContent='▾';title.appendChild(tl);title.appendChild(arw);const body=document.createElement('div');body.className='cbody';while(el.firstChild){body.appendChild(el.firstChild);}head.appendChild(title);el.appendChild(head);el.appendChild(body);title.addEventListener('click',()=>el.classList.toggle('closed'));});}
+boot(); setInterval(boot,15000);
+</script>
+</body>
+</html>

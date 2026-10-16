@@ -1,0 +1,35 @@
+# secrets & env
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*token*
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+# live runtime data (not code)
+results/
+*.jsonl
+*.tmp
+.briefing_state.json
+# backups / archives
+*.bak
+*.bak2
+*.bak3
+*.tgz
+*.zip
+# runtime control sentinels
+FLATTEN
+FLATTEN_BUYS
+FLATTEN_SELLS
+STOP
+BRAIN_OFF
+PRIMARY
+DIRECTION
+STRATEGY
+PAUSE_*
+# os
+.DS_Store

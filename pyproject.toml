@@ -1,0 +1,10 @@
+[project]
+name = "rsi-bot"
+version = "1.0.0"
+description = "RSI-on-Heikin-Ashi trading bot for Eightcap/MetaApi: realistic backtesting now, live demo trading + RON advisory to come."
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+    "rich>=13",
+]

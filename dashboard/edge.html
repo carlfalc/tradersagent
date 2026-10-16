@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RON EDGE</title>
+<style>
+:root{
+  --bg:#f4f7f6; --card:#ffffff; --line:#111317; --line2:#dfe6e4;
+  --fg:#0b0d0c; --muted:#53605d; --dim:#879591; --teal:#007d7d; --teal2:#00a3a3;
+  --pos:#0a8f5c; --neg:#d12a3a; --warn:#a85f00; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#e3f6f6,transparent),var(--bg);
+  color:var(--fg);font:15px/1.5 var(--mono);padding:20px;max-width:1280px;margin:0 auto}
+a{color:var(--teal);text-decoration:none}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.top h1{font-size:22px;margin:0;letter-spacing:2px}
+.tick{width:26px;height:26px;border-radius:7px;background:#2b7bff;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.pill{border:1px solid var(--line2);border-radius:999px;padding:5px 12px;color:var(--muted);font-size:12px}
+.pill a{color:var(--teal)}
+.sub{color:var(--muted);margin:4px 0 18px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{grid-column:span 12;background:linear-gradient(180deg,rgba(0,209,209,.05),transparent),var(--card);
+  border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;display:flex;justify-content:space-between;gap:10px}
+.eyebrow .n{color:var(--muted);letter-spacing:1px;text-transform:none}
+.headline{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.hcard{border:1px solid var(--line2);border-radius:12px;padding:14px 16px;background:rgba(0,209,209,.04)}
+.hcard .sym{color:var(--muted);font-size:12px}
+.hcard .big{font:700 15px var(--mono);margin:3px 0 4px}
+.hcard .meta{font-size:11px;color:var(--muted)}
+.inst{grid-column:span 12}
+.insthead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.insthead .nm{font-size:17px;font-weight:700}
+.insthead .cov{font-size:12px;color:var(--muted)}
+.insthead .px{margin-left:auto;font-size:15px;font-weight:700;color:var(--teal)}
+.cols{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+@media(max-width:820px){.cols{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--dim);font-weight:500;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{padding:6px 8px;border-bottom:1px solid var(--line)}
+td.r,th.r{text-align:right}
+.up{color:var(--pos)}.dn{color:var(--neg)}
+.tag{display:inline-block;border:1px solid var(--line2);border-radius:999px;padding:1px 8px;font-size:10px;color:var(--muted)}
+.tag.solid{color:var(--pos);border-color:#1b5}.tag.building{color:var(--warn);border-color:#853}.tag.early{color:var(--dim)}
+.tag.holding{color:var(--pos);border-color:#1b5}.tag.fading{color:var(--neg);border-color:#853}.tag.mixed{color:var(--warn);border-color:#853}.tag.fresh{color:var(--dim)}
+.stance{font-weight:700}.stance.bull{color:var(--pos)}.stance.bear{color:var(--neg)}.stance.wait{color:var(--warn)}.stance.none{color:var(--dim)}
+.heat{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:9px;margin-top:4px}
+.heat .hc{height:14px;border-radius:2px;background:#eef3f1}
+.heat .lbl{color:var(--dim);font-size:9px;line-height:14px}
+.heat .hd{color:var(--dim);font-size:8px;text-align:center}
+.srow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.srow .lbl{color:var(--muted)}
+.lvl{font-weight:700}
+.note{font-size:11px;color:var(--muted);margin-top:2px}
+.wait{color:var(--dim);text-align:center;padding:24px 0;font-size:12px}
+.foot{color:var(--dim);text-align:center;margin:26px 0 8px;font-size:11px}
+.appr{color:var(--warn)}
+.bar{height:8px;border-radius:5px;background:#eef3f1;overflow:hidden;min-width:60px;flex:1}
+.bar i{display:block;height:100%}
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="tick">✓</span>
+    <h1>RON EDGE</h1>
+    <span class="pill">statistical research · advisory</span>
+    <span class="pill"><a href="/dashboard/ron.html">← Agent RON</a></span>
+    <span class="pill"><a href="/dashboard/loop.html">Trading</a></span>
+    <span class="pill" id="asof">—</span>
+  </div>
+  <div class="sub">The research half of RON's brain — recurring time/session edges and live market structure, mined from history that grows every hour. Honest by sample size. For manual trading. Not financial advice.</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="eyebrow">right now <span class="n" id="nowMeta">—</span></div>
+      <div class="headline" id="nowPanel"><div class="wait">reading the clock…</div></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">strongest edges <span class="n">ranked across all instruments · self-graded · higher sample = more trustworthy</span></div>
+      <div class="headline" id="headline"><div class="wait">gathering history… edges sharpen as more candles record.</div></div>
+    </div>
+    <div id="instruments"></div>
+  </div>
+  <div class="foot">RON EDGE reads the candle history the bot records every hour · the longer it runs, the smarter it gets · demo · not financial advice</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let S=null;
+async function poll(){ try{ const r=await fetch("/results/edge.json",{cache:"no-store"}); S=await r.json(); render(); }catch(e){} setTimeout(poll, 15000); }
+poll();
+
+function conf(tier){ return `<span class="tag ${tier}">${tier}</span>`; }
+function statusTag(s){ return s?`<span class="tag ${s}" title="self-graded on recent occurrences">${s}</span>`:""; }
+function hrLabel(h,nzt){ const p=n=>String(n).padStart(2,"0"); return `${p(h)}:00 UTC · ${p(nzt)}:00 NZT`; }
+function heatHtml(vh){
+  if(!vh||!vh.matrix||!vh.matrix.length) return '<div class="wait">building…</div>';
+  const mx=vh.max||1, dow=vh.dow||["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  let h='<div class="heat"><div class="lbl"></div>';
+  for(let c=0;c<24;c+=1) h+=`<div class="hd">${c%6===0?c:""}</div>`;
+  for(let d=0;d<7;d++){
+    h+=`<div class="lbl">${dow[d]}</div>`;
+    for(let c=0;c<24;c++){
+      const v=vh.matrix[d]?vh.matrix[d][c]:null;
+      if(v==null){ h+='<div class="hc"></div>'; }
+      else{ const a=Math.max(0.08,Math.min(1,v/mx)); h+=`<div class="hc" style="background:rgba(0,209,209,${a.toFixed(2)})" title="${dow[d]} ${c}:00 · avg range ${v}"></div>`; }
+    }
+  }
+  return h+'</div>';
+}
+
+function render(){
+  if(!S||!S.instruments){ return; }
+  const now=new Date();
+  $("asof").textContent = "as of "+now.toUTCString().slice(17,25)+" UTC";
+  const insts=S.instruments;
+  const syms=Object.keys(insts);
+
+  // --- RIGHT NOW panel ---
+  if(S.now){
+    const p=n=>String(n).padStart(2,"0");
+    $("nowMeta").textContent = `${S.now.dow_name} · ${p(S.now.utc_hour)}:00 UTC · ${p(S.now.nzt_hour)}:00 NZT · ${S.now.session}`;
+    const per=S.now.per||{};
+    const keys=Object.keys(per);
+    $("nowPanel").innerHTML = keys.length ? keys.map(sym=>{
+      const r=per[sym];
+      const sc = /bull/.test(r.stance)?"bull":/bear/.test(r.stance)?"bear":/wait|mixed/.test(r.stance)?"wait":"none";
+      const bits=(r.bits||[]).map(b=>`<div class="meta">· ${b}</div>`).join("") || '<div class="meta">· no readable edge yet</div>';
+      return `<div class="hcard"><div class="sym">${r.name}</div>`+
+        `<div class="big"><span class="stance ${sc}">${r.stance.toUpperCase()}</span></div>${bits}</div>`;
+    }).join("") : '<div class="wait">building…</div>';
+  }
+
+  // headline: best edge bucket from each instrument, ranked
+  const all=[];
+  syms.forEach(sym=>{ (insts[sym].top_times||[]).forEach(r=>all.push({...r,sym,name:insts[sym].name})); });
+  all.sort((a,b)=>b.score-a.score);
+  const top=all.slice(0,6);
+  $("headline").innerHTML = top.length ? top.map(r=>{
+    const cls=r.dir==="up"?"up":"dn";
+    return `<div class="hcard"><div class="sym">${r.name}</div>`+
+      `<div class="big">${r.dow_name} ${hrLabel(r.hour,r.nzt_hour)}</div>`+
+      `<div class="meta"><span class="${cls}">${r.dir.toUpperCase()}</span> · median <span class="${cls}">${r.median>=0?"+":""}${r.median} pts</span> · `+
+      `${r.hits}/${r.n} ${r.dir} · n=${r.n} ${conf(r.conf)} ${statusTag(r.status)}</div></div>`;
+  }).join("") : '<div class="wait">gathering history… edges sharpen as more candles record.</div>';
+
+  // per-instrument panels
+  $("instruments").innerHTML = syms.map(sym=>{
+    const d=insts[sym];
+    const tt=(d.top_times||[]).map(r=>{
+      const cls=r.dir==="up"?"up":"dn";
+      return `<tr><td>${r.dow_name}</td><td>${hrLabel(r.hour,r.nzt_hour)}</td>`+
+        `<td class="${cls}">${r.dir.toUpperCase()}</td>`+
+        `<td class="r ${cls}">${r.median>=0?"+":""}${r.median}</td>`+
+        `<td class="r">${r.hits}/${r.n}</td><td class="r">${r.pct_up}%</td><td class="r">${conf(r.conf)} ${statusTag(r.status)}</td></tr>`;
+    }).join("") || '<tr><td colspan="7" class="wait">not enough history yet</td></tr>';
+
+    const ss=(d.sessions||[]).map(s=>{
+      const cls=s.dir==="up"?"up":"dn";
+      return `<div class="srow"><span class="lbl">${s.session}</span>`+
+        `<span><span class="${cls}">${s.dir.toUpperCase()}</span> · ${s.mean>=0?"+":""}${s.mean} pts · ${s.pct_up}% up · n=${s.n} ${conf(s.conf)}</span></div>`;
+    }).join("") || '<div class="wait">building…</div>';
+
+    const st=d.structure||{};
+    let structHtml;
+    if(!st.ready){ structHtml='<div class="wait">need ~20 candles to map structure</div>'; }
+    else{
+      const tcls=st.trend==="uptrend"?"up":st.trend==="downtrend"?"dn":"";
+      const obs=(st.order_blocks||[]).map(o=>`<div class="srow"><span class="lbl">${o.type} order block</span><span class="lvl">${o.lo} – ${o.hi}</span></div>`).join("");
+      const near=st.nearest?`<div class="srow"><span class="lbl">nearest level</span><span>${st.nearest.what} @ <span class="lvl">${st.nearest.level}</span> · ${st.nearest.pts} pts (${st.nearest.pct}%) ${st.nearest.approaching?'<span class="appr">⚠ approaching</span>':''}</span></div>`:"";
+      structHtml =
+        `<div class="srow"><span class="lbl">trend</span><span class="lvl ${tcls}">${(st.trend||"").toUpperCase()}</span></div>`+
+        (st.bos?`<div class="srow"><span class="lbl">structure</span><span class="appr">${st.bos}</span></div>`:"")+
+        (st.resistance?`<div class="srow"><span class="lbl">resistance</span><span class="lvl dn">${st.resistance.level}</span></div>`:"")+
+        (st.support?`<div class="srow"><span class="lbl">support</span><span class="lvl up">${st.support.level}</span></div>`:"")+
+        obs+near;
+    }
+
+    return `<div class="card inst">
+      <div class="insthead"><span class="nm">${d.name}</span>
+        <span class="cov">${d.candles} candles · ~${d.days} days recorded</span>
+        <span class="px">${d.price??"—"}</span></div>
+      <div class="cols">
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">best times to trade <span class="n">day × hour · from recorded history</span></div>
+          <table><thead><tr><th>day</th><th>time</th><th>bias</th><th class="r">median</th><th class="r">hits</th><th class="r">% up</th><th class="r">conf</th></tr></thead><tbody>${tt}</tbody></table>
+          <div class="eyebrow" style="margin:16px 0 6px">by session</div>
+          ${ss}
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">live structure <span class="n">S/R · order blocks · trend</span></div>
+          ${structHtml}
+        </div>
+      </div>
+      <div class="eyebrow" style="margin:16px 0 6px">volatility by time <span class="n">avg hourly range · brighter = more movement · hour in UTC</span></div>
+      ${heatHtml(d.vol_heatmap)}
+    </div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>

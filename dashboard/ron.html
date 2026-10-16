@@ -1,0 +1,704 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Agent RON</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#f4f7f6;--card:#ffffff;--line:#111317;--line2:#dfe6e4;
+  --fg:#0b0d0c;--muted:#53605d;--dim:#879591;--mono:'SF Mono',ui-monospace,Menlo,monospace;
+  --teal:#007d7d;--teal2:#00a3a3;--good:#0a8f5c;--bad:#d12a3a;--warn:#a85f00;
+  --blue:#2b7bff;--white:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(1100px 560px at 88% -12%,rgba(0,209,209,.16),transparent 60%),
+  radial-gradient(900px 520px at -8% 118%,rgba(25,179,154,.08),transparent 60%),var(--bg);
+  color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+.app{max-width:1760px;margin:0 auto;padding:14px 18px 20px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.brand{font:800 22px/1 Inter;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--teal);box-shadow:0 0 14px var(--teal);animation:pulse 1.6s infinite}
+.brand .tick{display:inline-flex;filter:drop-shadow(0 0 8px rgba(43,123,255,.55));animation:pulse 2.2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.brand em{font-style:normal;background:linear-gradient(95deg,var(--teal),#0bbd9b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrowbar{font:600 10.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.spacer{flex:1}
+.pill{font:500 11.5px var(--mono);padding:6px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:#ffffff;display:flex;align-items:center;gap:7px}
+.pill.hot{color:var(--teal);border-color:var(--teal2);background:rgba(0,163,163,.12)}
+a.back{text-decoration:none}
+.overview{border:1px solid var(--line);background:#ffffff;border-radius:14px;padding:14px 18px;margin:10px 0 14px}
+.overview .as-of{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.overview .line{font:15px/1.6 var(--mono);color:var(--fg)}
+.overview .line b.up{color:var(--good)} .overview .line b.dn{color:var(--bad)} .overview .line b.fl{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.card{background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-height:0;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 auto auto 0;height:2px;width:100%;background:linear-gradient(90deg,var(--teal),transparent 60%);opacity:.5}
+.eyebrow{font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between}
+.eyebrow .n{color:var(--teal)}
+.col3{grid-column:span 3}.col4{grid-column:span 4}.col6{grid-column:span 6}.col8{grid-column:span 8}.col12{grid-column:span 12}
+@media(max-width:1100px){.col3,.col4{grid-column:span 6}.col6,.col8{grid-column:span 12}}
+@media(max-width:680px){.col3,.col4,.col6,.col8{grid-column:span 12}}
+.big{font:800 clamp(46px,7vw,92px)/1 var(--mono);letter-spacing:-.03em;color:var(--teal);text-shadow:0 0 30px rgba(0,209,209,.35)}
+.bigsub{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:9px}
+.barrow{display:grid;grid-template-columns:96px 1fr 46px;align-items:center;gap:10px;font:12px var(--mono)}
+.barrow .lbl{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:14px;border-radius:6px;background:rgba(0,209,209,.08);overflow:hidden}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--teal2),var(--teal));border-radius:6px;transition:width .4s}
+.barrow .v{text-align:right;color:var(--fg);font-weight:600}
+.donut{display:flex;align-items:center;gap:16px}
+.legend{display:flex;flex-direction:column;gap:7px;font:12px var(--mono)}
+.legend .row{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.legend .sw{width:10px;height:10px;border-radius:3px}
+.legend b{color:var(--fg);margin-left:auto}
+table{width:100%;border-collapse:collapse;font:12px var(--mono)}
+th{color:var(--dim);text-align:left;font-weight:400;padding:5px 7px;border-bottom:1px solid var(--line)}
+td{padding:5px 7px;border-bottom:1px solid var(--line2);white-space:nowrap}
+td.r,th.r{text-align:right}
+.pos{color:var(--good)}.neg{color:var(--bad)}.side-buy{color:var(--good)}.side-sell{color:var(--bad)}
+.scroll{max-height:300px;overflow:auto}
+.hist{display:flex;align-items:flex-end;gap:4px;height:150px}
+.hist .b{flex:1;background:linear-gradient(180deg,var(--teal),var(--teal2));border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
+.hist-x{display:flex;justify-content:space-between;font:10px var(--mono);color:var(--dim);margin-top:4px}
+.placeholder{color:var(--dim);font:12px var(--mono);line-height:1.7}
+.placeholder .tag{display:inline-block;padding:2px 8px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);margin:2px 4px 2px 0}
+.biastiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:680px){.biastiles{grid-template-columns:1fr}}
+.biastile{border:1px solid var(--line2);border-radius:10px;padding:10px 12px;background:rgba(0,209,209,.04)}
+.biastile .nm{font:600 12px var(--mono);color:var(--fg)}
+.biastile .bs{font:800 20px var(--mono);margin:3px 0}
+.biastile .meta{font:11px var(--mono);color:var(--muted)}
+.foot{margin-top:14px;font:11px var(--mono);color:var(--dim);text-align:center}
+.wait{color:var(--dim);font:12px var(--mono);padding:20px 0;text-align:center}
+/* --- agentic brain --- */
+.brainstage{position:relative;height:720px;display:grid;place-items:center;overflow:hidden}
+.braincanvas{position:absolute;inset:0;width:100%;height:100%}
+.anode{position:absolute;display:flex;flex-direction:column;gap:1px;align-items:center;justify-content:center;
+  min-width:92px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.9);
+  font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);backdrop-filter:blur(3px);
+  animation:float 6s ease-in-out infinite}
+.anode .v{font:700 12px var(--mono);letter-spacing:0;text-transform:none;color:var(--fg)}
+.anode.live{border-color:var(--teal2);color:var(--teal);box-shadow:0 0 18px rgba(0,163,163,.18)}
+.anode.soon{border-style:dashed;color:var(--dim)}
+.anode .tagsoon{font:9px var(--mono);color:var(--warn);letter-spacing:.04em}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.a1{top:8%;left:12%;animation-delay:0s}.a2{top:4%;right:14%;animation-delay:.8s}
+.a3{top:42%;left:2%;animation-delay:1.6s}.a4{top:44%;right:2%;animation-delay:2.2s}
+.a5{bottom:8%;left:16%;animation-delay:1.1s}.a6{bottom:5%;right:16%;animation-delay:.4s}
+@media(max-width:680px){.brainstage{height:auto;gap:10px}.anode{position:static;animation:none;width:100%}}
+.brainmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+@media(max-width:680px){.brainmetrics{grid-template-columns:1fr}}
+.bm{border:1px solid var(--line2);border-radius:10px;padding:10px 12px;background:rgba(0,209,209,.04)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pcard{border:1px solid var(--line2);border-radius:10px;padding:12px 14px;background:rgba(0,209,209,.04)}
+.pcard .nm{color:var(--muted);font:12px var(--mono)}
+.pcard .ph{font:700 16px var(--mono);margin:4px 0 4px;color:var(--fg)}
+.pcard .psub{font:11px var(--mono);color:var(--muted);line-height:1.4}
+.pvrrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pvrcell{border:1px solid var(--line2);border-radius:12px;padding:14px 16px;background:rgba(0,209,209,.04)}
+.pvrlbl{color:var(--muted);font:12px var(--mono);margin-bottom:6px}
+.pvrwr{font:700 30px var(--mono)}
+.pvrwrs{font-size:13px;color:var(--muted);font-weight:400}
+.pvrnet{font:600 14px var(--mono);margin-top:2px}
+.pvrverdict{margin-top:12px;font:12px var(--mono);line-height:1.5}
+.ph.pos,.pvrwr.pos{color:var(--good)}.ph.neg,.pvrwr.neg{color:var(--bad)}
+.warn{color:var(--warn)}
+.polgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px}
+.polcard{border:1px solid var(--line2);border-radius:12px;padding:12px 14px;background:rgba(0,209,209,.04)}
+.polhd{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px}
+.polstance{font-size:12px;color:var(--teal);font-style:italic;margin:2px 0 8px;line-height:1.4}
+.polmet{font-size:12px;color:var(--fg);margin-bottom:8px}
+.polchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.polchip{font:10px var(--mono);letter-spacing:.03em;padding:3px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+.polchip.on{border-color:var(--warn);color:var(--warn);background:rgba(245,181,61,.08)}
+.polstat{font-size:11px;color:var(--muted)}
+.pollog{border-top:1px solid var(--line2);padding-top:10px}
+.polloghd{font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.pollogrow{font-size:12px;padding:3px 0;color:var(--fg)}
+.pollogrow .t{color:var(--muted);font:10px var(--mono)}
+.pollogrow .s{color:var(--teal);font:10px var(--mono)}
+.coachnote{font-size:14px;line-height:1.6;color:var(--fg)}
+.coachstat{margin-top:10px;font:11px var(--mono);color:var(--teal)}
+.coachmeta{margin-top:6px;font:10px var(--mono);color:var(--muted)}
+.bm .nm{font:600 11px var(--mono);color:var(--fg)}
+.bm .rate{font:800 22px var(--mono);color:var(--teal);letter-spacing:-.02em}
+.bm .sub{font:10.5px var(--mono);color:var(--muted)}
+.eyebrow{cursor:pointer}
+.cardarw{margin-left:8px;transition:transform .2s;color:var(--muted);font-size:13px}
+.card.collapsed .cardarw{transform:rotate(-90deg)}
+.card.collapsed .cbody{display:none}
+</style></head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="tick" title="RON"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="11" fill="var(--blue)"/><path d="M7 12.5l3.2 3.2L17 8.5" fill="none" stroke="var(--white)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><em>Agent RON</em></div>
+    <div class="eyebrowbar">· master analyst · advisory layer</div>
+    <div class="spacer"></div>
+    <div class="pill" id="tf">RSI · HA</div>
+    <div class="pill" id="ledgerPill">ledger 0</div>
+    <div class="pill" id="uptime">00:00:00</div>
+    <div class="pill hot" id="notifBtn" style="cursor:pointer">🔔 Enable alerts</div>
+    <a class="back" href="/dashboard/edge.html"><div class="pill hot">◆ RON EDGE →</div></a>
+    <a class="back" href="/dashboard/coach.html"><div class="pill hot">◆ COACH LOG →</div></a>
+    <a class="back" href="/"><div class="pill hot">← Trading dashboard</div></a>
+  </header>
+
+  <div class="overview">
+    <div class="as-of" id="asof">RON overview · —</div>
+    <div class="line" id="ovline">reading the markets…</div>
+  </div>
+
+  <div class="grid">
+    <div class="card col12" id="pvrCard">
+      <div class="eyebrow">paper vs real <span class="n">RON's paper calls vs the actual account — the honest gap</span></div>
+      <div id="pvr"><div class="wait">measuring…</div></div>
+    </div>
+    <div class="card col12" id="policyCard">
+      <div class="eyebrow">RON policy · self-adjusted <span class="n">what RON has learned from real trades and changed by itself</span></div>
+      <div id="policy"><div class="wait">learning…</div></div>
+    </div>
+    <div class="card col12" id="coachCard">
+      <div class="eyebrow">RON coach · advisory review <span class="n">an LLM read of the real ledger — advisory only, never trades</span></div>
+      <div id="coach"><div class="wait">…</div></div>
+    </div>
+    <div class="card col12">
+      <div class="eyebrow">RON alerts · live watcher <span class="n" id="alertMeta">watching…</span></div>
+      <div class="scroll" style="max-height:260px"><table><thead><tr><th>time</th><th>market</th><th>call</th><th class="r">conviction</th><th class="r">entry</th><th class="r">stop</th><th class="r">target</th><th>why</th><th>result</th></tr></thead><tbody id="alertRows"></tbody></table></div>
+    </div>
+    <div class="card col3">
+      <div class="eyebrow">RON calls graded <span class="n" id="sigN">0</span></div>
+      <div class="big" id="bigSignals">0</div>
+      <div class="bigsub" id="bigSub">self-graded against real price</div>
+    </div>
+    <div class="card col3">
+      <div class="eyebrow">RON call outcomes <span class="n">won · lost · open</span></div>
+      <div class="donut"><canvas id="donut" width="120" height="120"></canvas>
+        <div class="legend" id="donutLegend"></div></div>
+    </div>
+    <div class="card col6">
+      <div class="eyebrow">market bias · RON read <span class="n" id="biasAsof"></span></div>
+      <div class="biastiles" id="biasTiles"></div>
+    </div>
+
+    <div class="card col4">
+      <div class="eyebrow">trades by instrument</div>
+      <div class="bars" id="instBars"><div class="wait">waiting…</div></div>
+    </div>
+    <div class="card col4">
+      <div class="eyebrow">RON conviction <span class="n">spread of its calls</span></div>
+      <div class="hist" id="hist"></div>
+      <div class="hist-x"><span>50%</span><span>70%</span><span>90%</span></div>
+    </div>
+    <div class="card col4">
+      <div class="eyebrow">session P&amp;L <span class="n">realised</span></div>
+      <div class="bars" id="sessBars"><div class="wait">no closed trades yet</div></div>
+    </div>
+
+    <div class="card col8">
+      <div class="eyebrow">ledger · latest <span class="n">every decision, then its outcome</span></div>
+      <div class="scroll"><table><thead><tr><th>time</th><th>market</th><th>call</th><th class="r">conf</th><th>result</th></tr></thead><tbody id="ledgerRows"></tbody></table></div>
+    </div>
+    <div class="card col4">
+      <div class="eyebrow">RON · sessions <span class="n" id="sessNow">—</span></div>
+      <div id="sessAgent"><div class="wait">reading sessions…</div></div>
+    </div>
+    <div class="card col4">
+      <div class="eyebrow">RON · volatility <span class="n">activity regime</span></div>
+      <div id="volAgent"><div class="wait">reading volatility…</div></div>
+    </div>
+    <div class="card col4">
+      <div class="eyebrow">RON · multi-timeframe <span class="n">15m · 30m · 1h</span></div>
+      <div id="mtfAgent"><div class="wait">reading timeframes…</div></div>
+    </div>
+    <div class="card col12">
+      <div class="eyebrow">RON · chart patterns <span class="n">structure · flags · breakouts · tops/bottoms</span></div>
+      <div id="patAgent"><div class="wait">reading structure…</div></div>
+    </div>
+    <div class="card col12">
+      <div class="eyebrow">news &amp; sentiment <span class="n">coming online</span></div>
+      <div class="placeholder">
+        News / economic-calendar + sentiment plug in next — that one needs an external feed.
+        The plain-English pattern alerts (<b>watch for buys / sells</b>) already run live in the watcher above, timestamped and self-graded.
+      </div>
+    </div>
+    <div class="card col12">
+      <div class="eyebrow">RON calibration · earning "confirmed" <span class="n" id="calState"></span></div>
+      <div id="calWrap"><div class="wait">RON is not driving trades in this run — start with <code>--signal ron</code> to build calibration.</div></div>
+    </div>
+
+    <div class="card col12">
+      <div class="eyebrow">RON · agentic brain <span class="n" id="brainMeta"></span></div>
+      <div class="brainstage">
+        <canvas class="braincanvas" id="brainCanvas"></canvas>
+        <div class="anode live a1" id="an-news">news<div class="v" id="anNews">—</div></div>
+        <div class="anode live a2" id="an-sessions">sessions<div class="v" id="anSessions">—</div></div>
+        <div class="anode live a3" id="an-patterns">patterns<div class="v" id="anPat">live</div></div>
+        <div class="anode live a4" id="an-volume">volume<div class="v" id="anVol">—</div></div>
+        <div class="anode live a5" id="an-mtf">multi-TF<div class="v" id="anMtf">—</div></div>
+        <div class="anode live a6" id="an-cal">calibration<div class="v" id="anCal">0 graded</div></div>
+      </div>
+      <div class="brainmetrics" id="brainMetrics"></div>
+    </div>
+  </div>
+  <div class="foot" id="foot">Agent RON reads the same ledger the bot writes · demo · not financial advice</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let S = null;
+
+function sessionOf(iso){
+  try{ const h=new Date(iso).getUTCHours();
+    if(h<7)return"Asian"; if(h<12)return"London"; if(h<16)return"London/NY"; if(h<21)return"New York"; return"Sydney";
+  }catch(e){return"?";}
+}
+const money=(v,cur)=>(v>=0?"+":"")+Number(v).toFixed(2)+" "+(cur||"AUD");
+const cls=(v)=>v>0?"pos":v<0?"neg":"";
+
+let B=null;
+async function tick(){
+  try{ const r=await fetch("/results/loop.json",{cache:"no-store"}); S=await r.json(); render(); }
+  catch(e){}
+  try{ const rb=await fetch("/results/briefing.json",{cache:"no-store"}); if(rb.ok){B=await rb.json();} }catch(e){}
+  renderBrainLive();
+}
+setInterval(tick,2000); tick();
+
+function makeCards(){
+  document.querySelectorAll('.card').forEach(c=>{
+    if(c.dataset.coll) return; const eb=c.querySelector('.eyebrow'); if(!eb) return;
+    c.dataset.coll='1';
+    const arw=document.createElement('span'); arw.className='cardarw'; arw.textContent='▾'; eb.appendChild(arw);
+    const body=document.createElement('div'); body.className='cbody';
+    const rest=[]; let n=eb.nextSibling; while(n){rest.push(n); n=n.nextSibling;}
+    rest.forEach(x=>body.appendChild(x)); c.appendChild(body);
+    eb.addEventListener('click',()=>c.classList.toggle('collapsed'));
+  });
+}
+setTimeout(makeCards, 400);
+
+function nztDT(epoch){ if(!epoch)return '—'; const off=13; const d=new Date(epoch*1000+off*3600000);
+  let h=d.getUTCHours(),m=d.getUTCMinutes(),ap=h>=12?'pm':'am'; h=h%12||12; return `${h}:${String(m).padStart(2,'0')}${ap}`; }
+function renderBrainLive(){
+  // News node: last-read time + verdict (was "coming")
+  if($("anNews")){
+    if(B&&B.as_of){ const v=(B.usd&&B.usd.verdict)||(B.ok?'read':'offline');
+      $("anNews").innerHTML = `${nztDT(B.as_of)}<br><span style="font-size:9px;color:var(--muted)">${(v||'').slice(0,16)}</span>`; }
+    else $("anNews").textContent='warming up';
+  }
+  // Volume node: live relative volume from the trend learner
+  const tq=(S&&S.ron_trend&&S.ron_trend.current);
+  if($("anVol")&&tq&&tq.rel_vol!=null){ $("anVol").innerHTML=`${tq.rel_vol}×${tq.vol_surge?' <span style="color:var(--good)">surge</span>':''}`; }
+  // add/refresh a trend-quality metric under the brain
+  if($("brainMetrics")&&tq){
+    let el=document.getElementById('bm-trend');
+    const html=`<div class="bm" id="bm-trend"><div class="nm">trend quality · ${tq.dir==='up'?'▲ up':'▼ down'} since ${tq.since_nzt||''} NZT</div><div class="ph ${tq.quality!=null&&tq.quality>=55?'pos':tq.quality!=null?'neg':''}">${tq.quality!=null?tq.quality+'%':'learning'}</div><div class="psub">${tq.duration_min}m · ${tq.rel_vol!=null?tq.rel_vol+'× volume'+(tq.vol_surge?' surge':''):'volume —'} · ${(S.ron_trend.graded||0)} trends graded</div></div>`;
+    if(el) el.outerHTML=html; else $("brainMetrics").insertAdjacentHTML('afterbegin',html);
+  }
+}
+
+function render(){
+  if(!S)return;
+  const cur=S.currency||"AUD";
+  const insts=S.instruments||[];
+  $("tf").textContent=S.model||"RSI · HA";
+  if(S.started){const up=Math.floor(Date.now()/1000-S.started);const p=(n)=>String(n).padStart(2,"0");
+    $("uptime").textContent=`${p(Math.floor(up/3600))}:${p(Math.floor(up/60)%60)}:${p(up%60)}`;}
+
+  // totals
+  const totalSignals=insts.reduce((a,i)=>a+(i.calls||0),0);
+  const totalTrades=insts.reduce((a,i)=>a+(i.trades||0),0);
+  const closed=S.closed_trades||[];
+  const wcOv=(S.ron_watch_calibration&&S.ron_watch_calibration.overall)||{};
+  const graded=wcOv.n||0;
+  $("bigSignals").textContent=graded.toLocaleString();
+  $("sigN").textContent=graded.toLocaleString();
+  if($("bigSub")) $("bigSub").textContent = wcOv.win_rate!=null ? `${wcOv.win_rate}% win · self-graded` : "self-graded against real price";
+  $("ledgerPill").textContent=`graded ${graded.toLocaleString()}`;
+
+  // overview line
+  const now=new Date();
+  $("asof").textContent=`RON overview · as of ${now.toUTCString().slice(17,25)} UTC`;
+  $("biasAsof").textContent=now.toUTCString().slice(17,22)+" UTC";
+  const parts=insts.map(i=>{
+    const b=i.bias||"flat"; const c=b==="long"?"up":b==="short"?"dn":"fl";
+    const word=b==="long"?"bullish":b==="short"?"bearish":"neutral";
+    return `${i.name} <b class="${c}">${word}</b>${i.paused?" (paused)":""}`;
+  });
+  $("ovline").innerHTML = parts.length? parts.join(" · ") : "reading the markets…";
+
+  // verdicts donut: RON call outcomes — won / lost / open
+  const wins=wcOv.wins||0;
+  const losses=Math.max(0,(wcOv.n||0)-wins);
+  const open=(S.ron_alerts||[]).filter(a=>!a.result).length;
+  drawDonut([["won",wins,"#00d1d1"],["lost",losses,"#ff5d6c"],["open",open,"#f5b53d"]]);
+
+  // market bias tiles
+  $("biasTiles").innerHTML=insts.map(i=>{
+    const b=i.bias||"flat"; const c=b==="long"?"pos":b==="short"?"neg":"";
+    const pos=i.pos>0?`LONG ${Math.abs(i.lots).toFixed(2)}`:i.pos<0?`SHORT ${Math.abs(i.lots).toFixed(2)}`:"flat";
+    return `<div class="biastile"><div class="nm">${i.name}${i.paused?' · <span style="color:var(--warn)">paused</span>':''}</div>`+
+      `<div class="bs ${c}">${b.toUpperCase()}</div>`+
+      `<div class="meta">RSI ${i.rsi??"–"} · ${pos} · P&L <span class="${cls(i.unrealized)}">${money(i.unrealized||0,cur)}</span></div></div>`;
+  }).join("")||'<div class="wait">waiting…</div>';
+
+  // trades by instrument
+  const maxT=Math.max(1,...insts.map(i=>i.trades||0));
+  $("instBars").innerHTML=insts.map(i=>
+    `<div class="barrow"><span class="lbl">${i.name}</span><div class="track"><i style="width:${100*(i.trades||0)/maxT}%"></i></div><span class="v">${i.trades||0}</span></div>`
+  ).join("")||'<div class="wait">waiting…</div>';
+
+  // RON conviction spread (0.50–0.95) — from the watcher's calls, which actually vary
+  const convVals=[];
+  (S.ron_alerts||[]).forEach(a=>{ if(a&&a.conv!=null) convVals.push(+a.conv); });
+  const wrec=(S.ron_watch_calibration&&S.ron_watch_calibration.recent)||[];
+  wrec.forEach(r=>{ if(r&&r.raw_conf!=null) convVals.push(+r.raw_conf); });
+  const bins=new Array(10).fill(0);
+  convVals.forEach(v=>{let k=Math.min(9,Math.max(0,Math.floor((v-0.5)/0.045)));bins[k]++;});
+  const maxB=Math.max(1,...bins);
+  $("hist").innerHTML=bins.map(b=>`<div class="b" style="height:${100*b/maxB}%" title="${b}"></div>`).join("")
+    || '<div class="wait">building…</div>';
+
+  // session P&L from closed trades
+  const sess={};
+  closed.forEach(c=>{const s=sessionOf(c.t*1000);(sess[s]=sess[s]||{n:0,pnl:0});sess[s].n++;sess[s].pnl+=(+c.pnl||0);});
+  const sEntries=Object.entries(sess).sort((a,b)=>b[1].pnl-a[1].pnl);
+  const maxAbs=Math.max(1,...sEntries.map(([,v])=>Math.abs(v.pnl)));
+  $("sessBars").innerHTML=sEntries.length? sEntries.map(([k,v])=>
+    `<div class="barrow"><span class="lbl">${k}</span><div class="track"><i style="width:${100*Math.abs(v.pnl)/maxAbs}%;background:${v.pnl>=0?'linear-gradient(90deg,var(--teal2),var(--teal))':'linear-gradient(90deg,#8a2d38,var(--bad))'}"></i></div><span class="v ${cls(v.pnl)}">${v.pnl>=0?"+":""}${v.pnl.toFixed(0)}</span></div>`
+  ).join("") : '<div class="wait">no closed trades yet</div>';
+
+  // RON calibration
+  renderCalibration();
+  renderAgents();
+  renderBrain(insts,closed,cur);
+  renderAlerts();
+
+  // ledger: interleave recent closed trades (with outcome) + recent signals
+  const rows=[];
+  closed.slice(0,40).forEach(c=>rows.push({t:c.t,mkt:c.name||c.symbol,call:c.side,conf:null,
+    result:`<span class="${cls(c.pnl)}">${money(c.pnl,cur)}</span> · ${c.reason||""}`}));
+  $("ledgerRows").innerHTML=rows.length? rows.map(r=>{
+    const tm=new Date((r.t||0)*1000).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    return `<tr><td>${tm}</td><td>${r.mkt}</td><td class="side-${r.call}">${(r.call||"").toUpperCase()}</td>`+
+      `<td class="r">${r.conf!=null?Math.round(r.conf*100)+"%":"–"}</td><td>${r.result}</td></tr>`;
+  }).join("") : '<tr><td class="wait" colspan="5">no closed decisions yet — RON logs each one here with its outcome</td></tr>';
+}
+
+function renderAgents(){
+  // Sessions agent
+  const S1=S.ron_sessions||{}, cur1=(S1.current||{});
+  if(cur1.label){ $("sessNow").textContent=cur1.label; }
+  const bySym=S1.by_symbol||{};
+  const sKeys=Object.keys(bySym);
+  $("sessAgent").innerHTML = sKeys.length ? sKeys.map(sym=>{
+    const best=bySym[sym].best;
+    if(!best) return `<div class="barrow"><span class="lbl">${sym}</span><span class="v" style="color:var(--dim)">no trades yet</span></div>`;
+    return `<div class="barrow"><span class="lbl">${sym}</span><div class="track"><i style="width:${Math.min(100,Math.abs(best.win_rate||0))}%"></i></div>`+
+      `<span class="v">${best.session} · ${best.win_rate!=null?best.win_rate+'%':'–'} <span class="${cls(best.pnl)}">(${best.pnl>=0?'+':''}${(best.pnl||0).toFixed(0)})</span></span></div>`;
+  }).join("") : `<div class="line" style="margin:0">Live session: <b>${cur1.label||'—'}</b>. Best-by-session builds as trades close.</div>`;
+
+  // Volatility agent
+  const V=(S.ron_volatility&&S.ron_volatility.rows)||[];
+  const vcol={spiking:'var(--bad)',elevated:'var(--warn)',normal:'var(--teal)',calm:'var(--dim)'};
+  $("volAgent").innerHTML = V.length ? V.map(r=>
+    `<div class="barrow"><span class="lbl">${r.name}</span>`+
+    `<span class="v"><b style="color:${vcol[r.regime]||'var(--fg)'}">${r.regime.toUpperCase()}</b>`+
+    `${r.spike?' 🔥':''} · ×${r.range_ratio}</span></div>`+
+    `<div style="font:11px var(--mono);color:var(--muted);margin:-2px 0 8px 0">${r.note}</div>`
+  ).join("") : '<div class="wait">warming up…</div>';
+  const spk=V.filter(r=>r.spike).map(r=>r.symbol);
+  if($("anVol")) $("anVol").textContent = spk.length? `${spk.length} spiking` : (V.length? 'normal':'—');
+
+  // bias lookup (current trade direction per instrument) for the conflict flag
+  const biasOf={}; (S.instruments||[]).forEach(i=>{biasOf[i.symbol]=i.bias;});
+
+  // Multi-TF agent + counter-trend conflict flag
+  const M=(S.ron_multitf&&S.ron_multitf.rows)||[];
+  const mcol={'aligned up':'pos','aligned down':'neg','reversal risk':'warn','mixed':''};
+  let conflicts=0;
+  $("mtfAgent").innerHTML = M.length ? M.map(r=>{
+    const c=mcol[r.state]||'';
+    const b=biasOf[r.symbol];
+    const conflict=(b==='long'&&r.state==='aligned down')||(b==='short'&&r.state==='aligned up');
+    if(conflict) conflicts++;
+    const flag=conflict?` <span class="neg">⚠ ${b.toUpperCase()} vs trend — counter-trend</span>`:'';
+    const warn=r.warning?`<div style="font:11px var(--mono);color:var(--warn);margin:-2px 0 8px 0">⚠ ${r.warning}</div>`:
+      `<div style="font:11px var(--mono);color:var(--muted);margin:-2px 0 8px 0">${r.summary||''}</div>`;
+    return `<div class="barrow"><span class="lbl">${r.name}</span><span class="v"><b class="${c}">${r.state.toUpperCase()}</b>${flag}</span></div>${warn}`;
+  }).join("") : '<div class="wait">reading 15m · 30m · 1h…</div>';
+  const rev=M.filter(r=>r.state==='reversal risk').length;
+  if($("anMtf")) $("anMtf").textContent = conflicts? `${conflicts} counter-trend` : (M.length? (rev? `${rev} reversal`:'aligned/mixed'):'—');
+
+  // Chart patterns agent
+  const P=(S.ron_patterns&&S.ron_patterns.rows)||[];
+  $("patAgent").innerHTML = P.length ? `<div class="pgrid">`+P.map(r=>{
+    const headline = r.pattern ? r.pattern.toUpperCase() : r.structure.toUpperCase();
+    const pc = /up|bull|bottom|inverse/.test((r.pattern||r.structure)) ? 'pos'
+             : /down|bear|top|head/.test((r.pattern||r.structure)) ? 'neg' : '';
+    return `<div class="pcard"><div class="nm">${r.name}</div>`+
+      `<div class="ph ${pc}">${headline}</div>`+
+      `<div class="psub">${r.note||''}</div></div>`;
+  }).join("")+`</div>` : '<div class="wait">reading structure…</div>';
+  const named=P.filter(r=>r.pattern).length;
+  if($("anPat")) $("anPat").textContent = named? `${named} pattern${named>1?'s':''}` : 'structure';
+
+  renderPvR();
+  renderPolicy();
+  renderCoach();
+}
+
+function renderCoach(){
+  const el=$("coach"); if(!el) return;
+  const c=S.ron_coach||{};
+  if(!c.note){ el.innerHTML=`<div class="wait">Coach is off until an Anthropic API key is set on the server. Once on, RON reviews the ledger every ~30 min.</div>`; return; }
+  const when=c.generated_at?new Date(c.generated_at*1000).toLocaleString():'';
+  const bad=c.ok===false;
+  const stats=c.stats?`<div class="coachstat">${c.stats.trades} trades · ${Math.round((c.stats.win_rate||0)*100)}% win · net ${c.stats.net_aud>=0?'+':''}${(c.stats.net_aud||0).toFixed(0)} AUD</div>`:'';
+  el.innerHTML=`<div class="coachnote ${bad?'neg':''}">${(c.note||'').replace(/\n/g,'<br>')}</div>${stats}<div class="coachmeta">${bad?'':'model '+(c.model||'')+' · '}${when}</div>`;
+}
+
+function renderPolicy(){
+  const el=$("policy"); if(!el) return;
+  const pol=S.ron_policy||{};
+  const insts=pol.instruments||[];
+  const lessons=pol.lessons||[];
+  if(!insts.length){ el.innerHTML=`<div class="wait">No real trades graded yet — RON starts adapting the moment it has outcomes to learn from. Base conviction floor ${(pol.base_conv||0.72).toFixed(2)}.</div>`; return; }
+  const chip=(on,label)=>`<span class="polchip ${on?'on':''}">${label}</span>`;
+  const cards=insts.map(r=>{
+    const raised = r.conv_floor>r.base_conv;
+    const status = r.paused? `<span class="neg">PAUSED ${Math.ceil(r.paused_in_s/60)}m</span>`
+                 : r.cooldown_in_s>0? `<span class="warn">cooldown ${r.cooldown_in_s}s</span>`
+                 : `<span class="pos">trading</span>`;
+    return `<div class="polcard">
+      <div class="polhd"><b>${r.symbol}</b> ${status}</div>
+      ${r.stance?`<div class="polstance">“${r.stance}”</div>`:''}
+      <div class="polmet">conviction floor <b class="${raised?'warn':''}">${r.conv_floor.toFixed(2)}</b>`+
+        `${raised?` <span style="color:var(--muted)">(base ${r.base_conv.toFixed(2)}, raised)</span>`:` <span style="color:var(--muted)">(base)</span>`}</div>
+      <div class="polchips">`+
+        chip(r.require_trend,'trend filter')+
+        chip(!!r.blocked_dir, r.blocked_dir? `${r.blocked_dir}s blocked`:'no block')+
+        chip(r.cooldown_streak>0, `stops in a row: ${r.cooldown_streak}`)+
+      `</div>
+      <div class="polstat">last ${r.n}: <span class="${r.net>=0?'pos':'neg'}">${r.net>=0?'+':''}${(r.net||0).toFixed(0)}</span> · ${Math.round((r.win_rate||0)*100)}% win${r.tp_r?` · banks ~${(+r.tp_r).toFixed(1)}R`:''}</div>
+    </div>`;
+  }).join("");
+  const log = lessons.length
+    ? `<div class="pollog"><div class="polloghd">what RON changed, newest first</div>`+
+        lessons.map(l=>`<div class="pollogrow"><span class="t">${new Date((l.t||0)*1000).toLocaleTimeString()}</span> <span class="s">${l.symbol}</span> ${l.msg}</div>`).join("")+
+      `</div>`
+    : `<div class="pollog"><div style="color:var(--muted)">No adjustments yet — RON is still gathering outcomes.</div></div>`;
+  el.innerHTML = `<div class="polgrid">${cards}</div>${log}`;
+}
+
+function renderPvR(){
+  const el=$("pvr"); if(!el) return;
+  const cur=S.currency||"AUD";
+  const paper=(S.ron_watch_calibration&&S.ron_watch_calibration.overall)||{};
+  const closed=S.closed_trades||[];
+  // real account: realised P&L and win-rate from actual closed trades
+  let rNet=0, rWins=0, rN=closed.length;
+  closed.forEach(c=>{const p=+c.pnl||0; rNet+=p; if(p>0) rWins++;});
+  const rWR = rN? Math.round(100*rWins/rN) : null;
+  const pWR = paper.win_rate!=null? paper.win_rate : null;
+  const tf = S.trend_filter;
+  const skips = S.trend_skips||0;
+  const cell=(label,wr,net,sub,good)=>`<div class="pvrcell">`+
+    `<div class="pvrlbl">${label}</div>`+
+    `<div class="pvrwr ${good}">${wr!=null?wr+'%':'–'}<span class="pvrwrs"> win</span></div>`+
+    `<div class="pvrnet ${cls(net)}">${net>=0?'+':''}${(net||0).toFixed(0)} <span style="font-size:11px;color:var(--muted)">${sub}</span></div></div>`;
+  const gap = (pWR!=null&&rWR!=null)? (pWR - rWR) : null;
+  let verdict;
+  if(rN<5){ verdict = `<span style="color:var(--muted)">Too few real trades yet (${rN}) to compare — let it run.</span>`; }
+  else if(rNet>=0){ verdict = `<span class="pos">Account is net positive. RON's edge is translating.</span>`; }
+  else { verdict = `<span class="neg">Account is net negative while RON's paper calls score ${pWR??'–'}% — the gap is execution/counter-trend. ${tf?`Trend filter is ON (${skips} skipped).`:'Consider the trend filter.'}</span>`; }
+  el.innerHTML = `<div class="pvrrow">`+
+    cell("RON — paper calls", pWR, (paper.pnl||0), "paper pts", "pos")+
+    cell("Account — real fills", rWR, rNet, cur+" realised", rNet>=0?'pos':'neg')+
+    `</div><div class="pvrverdict">${verdict}</div>`;
+}
+
+function renderCalibration(){
+  // RON's self-graded WATCHER calibration — always building, whatever's trading. This is how RON gets smarter.
+  const cal=S.ron_watch_calibration || S.ron_calibration;
+  const el=$("calWrap"), st=$("calState");
+  if(!cal){ st.textContent=""; el.innerHTML=`<div class="wait">RON is warming up — its calls get graded here as price plays out.</div>`; return; }
+  const o=cal.overall||{}, per=cal.per_symbol||{}, minN=cal.min_n||15;
+  st.textContent=`${o.n||0} graded · needs ${minN}/instrument to calibrate`;
+  const pct=(v)=>v==null?"–":v+"%";
+  const bad=(b)=>b==null?"–":b.toFixed(2);
+  const rows=Object.entries(per).map(([sym,s])=>{
+    const cal_=s.calibrated!=null?`<b class="${s.calibrated>=0.5?'pos':'neg'}">${Math.round(s.calibrated*100)}%</b>`
+      :`<span style="color:var(--warn)">calibrating ${s.n}/${minN}</span>`;
+    return `<tr><td>${sym}</td><td class="r">${s.n}</td><td class="r ${s.win_rate>=50?'pos':'neg'}">${pct(s.win_rate)}</td>`+
+      `<td class="r">${bad(s.brier)}</td><td class="r ${cls(s.pnl)}">${s.pnl>=0?'+':''}${(s.pnl||0).toFixed(0)}</td><td class="r">${cal_}</td></tr>`;
+  }).join("");
+  el.innerHTML=`
+    <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px;font:12px var(--mono);color:var(--muted)">
+      <span>graded <b style="color:var(--fg)">${o.n||0}</b></span>
+      <span>win-rate <b class="${(o.win_rate||0)>=50?'pos':'neg'}">${pct(o.win_rate)}</b></span>
+      <span>Brier <b style="color:var(--fg)">${bad(o.brier)}</b> <span style="color:var(--dim)">(lower=better)</span></span>
+      <span>net <b class="${cls(o.pnl)}">${o.pnl>=0?'+':''}${(o.pnl||0).toFixed(0)} ${S.currency||'AUD'}</b></span>
+    </div>
+    <table><thead><tr><th>instrument</th><th class="r">graded</th><th class="r">win-rate</th><th class="r">Brier</th><th class="r">net</th><th class="r">calibrated conf</th></tr></thead>
+    <tbody>${rows||'<tr><td class="wait" colspan="6">no graded RON trades yet — they appear here as positions close</td></tr>'}</tbody></table>
+    <div style="margin-top:10px;color:var(--dim);font:11px var(--mono)">Once an instrument has ${minN}+ graded trades, its calibrated confidence = its real win-rate — that's when "not_calibrated" becomes calibrated, honestly.</div>`;
+}
+
+function renderBrain(insts, closed, cur){
+  // header: real events, not poll counts
+  const wc=(S.ron_watch_calibration&&S.ron_watch_calibration.overall)||{};
+  const graded=wc.n||0;
+  const totalTrades=insts.reduce((a,i)=>a+(i.trades||0),0);
+  $("brainMeta").textContent = `${graded.toLocaleString()} RON calls graded · ${totalTrades} trades taken`;
+  // sessions node: best session by realised P&L
+  const sess={}; (closed||[]).forEach(c=>{const s=sessionOf(c.t*1000);(sess[s]=sess[s]||0);sess[s]+=(+c.pnl||0);});
+  const best=Object.entries(sess).sort((a,b)=>b[1]-a[1])[0];
+  $("anSessions").textContent = best? `${best[0]} ${best[1]>=0?"+":""}${best[1].toFixed(0)}` : "—";
+  // calibration node → the WATCHER ledger (the one that actually grows), not the empty RON-driven one
+  $("anCal").textContent = `${graded} graded`;
+  // per-instrument REAL counts: trades taken + win-rate from RON calibration
+  const per=(S.ron_watch_calibration&&S.ron_watch_calibration.per_symbol)||{};
+  $("brainMetrics").innerHTML = insts.map(i=>{
+    const c=per[i.symbol]||{};
+    const wr=c.win_rate!=null?`${c.win_rate}% win`:"—";
+    return `<div class="bm"><div class="nm">${i.name}${i.paused?' · <span style="color:var(--warn)">paused</span>':''}</div>`+
+      `<div class="rate">${i.trades||0}<span style="font-size:12px;color:var(--muted)"> trades</span></div>`+
+      `<div class="sub">${c.n||0} graded · ${wr} · RSI ${i.rsi??"–"}</div></div>`;
+  }).join("");
+}
+
+// ---------- agentic brain: rotating 3-D neural point-cloud with electron sparks ----------
+(function brain(){
+  const c=document.getElementById("brainCanvas"); if(!c) return;
+  const ctx=c.getContext("2d");
+  let W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1);
+  function resize(){const r=c.getBoundingClientRect();W=r.width;H=r.height;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  new ResizeObserver(resize).observe(c); resize();
+
+  // build a brain-shaped point cloud: two lobes (ellipsoids), bumpy, mirrored
+  const N=170, nodes=[];
+  for(let i=0;i<N;i++){
+    const lobe=i<N/2?-1:1; let x,y,z;
+    do{x=Math.random()*2-1;y=Math.random()*2-1;z=Math.random()*2-1;}while(x*x+y*y+z*z>1);
+    nodes.push({
+      x: lobe*0.52 + x*0.5,
+      y: y*0.64 + 0.12*Math.sin(x*3.1) - 0.04,   // folds
+      z: z*0.52,
+      r: 0.6+Math.random()*1.4,
+      tw: Math.random()*6.28                      // twinkle phase
+    });
+  }
+  // edges = nearest neighbours
+  const edges=[], adj=nodes.map(()=>[]);
+  for(let i=0;i<N;i++){
+    const d=[];
+    for(let j=0;j<N;j++) if(j!==i){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,dz=nodes[i].z-nodes[j].z;d.push([dx*dx+dy*dy+dz*dz,j]);}
+    d.sort((a,b)=>a[0]-b[0]);
+    for(let k=0;k<3;k++){const j=d[k][1];const a=Math.min(i,j),b=Math.max(i,j);
+      if(!adj[a].some(e=>edges[e][1]===b)){const idx=edges.length;edges.push([a,b]);adj[a].push(idx);adj[b].push(idx);}}
+  }
+  // electrons: travel an edge, then hop to a connected edge
+  const sparks=[];
+  function newSpark(){const e=(Math.random()*edges.length)|0;return {e,t:Math.random(),spd:0.006+Math.random()*0.016,dir:Math.random()<.5?1:-1,life:1};}
+  for(let i=0;i<46;i++) sparks.push(newSpark());
+
+  let ang=0, tilt=0.42, last=0;
+  function project(n,ca,sa){
+    const x=n.x*ca - n.z*sa, z=n.x*sa + n.z*ca, y=n.y;
+    const y2=y*Math.cos(tilt)-z*Math.sin(tilt), z2=y*Math.sin(tilt)+z*Math.cos(tilt);
+    const persp=1/(1.8 - z2*0.75), scale=Math.min(W,H)*1.02;
+    return {sx:W/2 + x*scale*persp, sy:H/2 + y2*scale*persp, z:z2, p:persp};
+  }
+  function frame(t){
+    requestAnimationFrame(frame);
+    if(t-last<33) return; last=t;                 // ~30fps
+    ang+=0.0032;                                    // slow rotation
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation="lighter";        // additive glow
+    const ca=Math.cos(ang),sa=Math.sin(ang);
+    const P=nodes.map(n=>project(n,ca,sa));
+    // edges
+    for(const [a,b] of edges){
+      const pa=P[a],pb=P[b], depth=(pa.z+pb.z)/2;
+      const al=0.06+0.10*(depth+0.6);
+      ctx.strokeStyle=`rgba(0,209,209,${Math.max(0,al).toFixed(3)})`;
+      ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(pa.sx,pa.sy); ctx.lineTo(pb.sx,pb.sy); ctx.stroke();
+    }
+    // nodes (twinkle)
+    for(let i=0;i<N;i++){
+      const p=P[i], n=nodes[i], tw=0.6+0.4*Math.sin(t*0.003+n.tw);
+      const rad=(0.7+n.r*0.9)*p.p*tw, bright=0.35+0.5*(p.z+0.6);
+      ctx.fillStyle=`rgba(0,209,209,${Math.min(1,bright).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(p.sx,p.sy,Math.max(0.4,rad),0,6.283); ctx.fill();
+    }
+    // electron sparks
+    for(const s of sparks){
+      s.t+=s.spd*s.dir;
+      if(s.t>1||s.t<0){                              // hop to a connected edge
+        const [a,b]=edges[s.e]; const node=s.t>1?b:a;
+        const opts=adj[node]; s.e=opts[(Math.random()*opts.length)|0];
+        const [na,nb]=edges[s.e]; s.dir=(na===node)?1:-1; s.t=(s.dir>0)?0:1;
+      }
+      const [a,b]=edges[s.e], pa=P[a], pb=P[b];
+      const x=pa.sx+(pb.sx-pa.sx)*s.t, y=pa.sy+(pb.sy-pa.sy)*s.t, pz=pa.z+(pb.z-pa.z)*s.t;
+      const g=ctx.createRadialGradient(x,y,0,x,y,7*(0.7+pz+0.6));
+      g.addColorStop(0,"rgba(190,252,255,0.95)"); g.addColorStop(0.4,"rgba(0,209,209,0.6)"); g.addColorStop(1,"rgba(0,209,209,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,7*(0.7+pz+0.6),0,6.283); ctx.fill();
+      ctx.fillStyle="rgba(255,255,255,0.95)"; ctx.beginPath(); ctx.arc(x,y,1.4,0,6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation="source-over";
+  }
+  requestAnimationFrame(frame);
+})();
+
+let notifOK=false; const seenAlerts=new Set();
+(function initNotif(){
+  const b=document.getElementById("notifBtn"); if(!b)return;
+  const setLabel=()=>{ b.textContent = notifOK?"🔔 Alerts on":"🔔 Enable alerts"; };
+  if(window.Notification && Notification.permission==="granted") notifOK=true; setLabel();
+  b.addEventListener("click",()=>{
+    if(!window.Notification){ b.textContent="notifications unsupported"; return; }
+    Notification.requestPermission().then(p=>{ notifOK=(p==="granted"); setLabel(); });
+  });
+})();
+function fmtT(t){return new Date((t||0)*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+
+function renderAlerts(){
+  const al=S.ron_alerts||[];
+  const wcal=(S.ron_watch_calibration&&S.ron_watch_calibration.overall)||{};
+  $("alertMeta").textContent = al.length
+    ? `${al.length} recent · ${wcal.n||0} graded · win ${wcal.win_rate!=null?wcal.win_rate+"%":"–"}` : "watching…";
+  $("alertRows").innerHTML = al.length ? al.map(a=>{
+    const badge = a.result
+      ? ((a.result.includes("target")||a.result.includes("+")) ? `<span class="pos">✔ ${a.result}</span>` : `<span class="neg">✖ ${a.result}</span>`)
+      : `<span style="color:var(--warn)">open</span>`;
+    return `<tr><td>${fmtT(a.t)}</td><td>${a.name||a.symbol}</td>`+
+      `<td class="side-${a.dir==='long'?'buy':'sell'}">${a.dir==='long'?'LONG':'SHORT'}</td>`+
+      `<td class="r">${Math.round(a.conv*100)}%</td><td class="r">${a.entry}</td>`+
+      `<td class="r neg">${a.stop}</td><td class="r pos">${a.target}</td>`+
+      `<td style="white-space:normal;color:var(--muted)">${a.reason||""}</td><td>${badge}</td></tr>`;
+  }).join("") : '<tr><td class="wait" colspan="9">RON is watching — high-conviction alerts appear here in real time</td></tr>';
+  if(notifOK && window.Notification){
+    al.slice().reverse().forEach(a=>{
+      if(seenAlerts.has(a.id)) return; seenAlerts.add(a.id);
+      if(!renderAlerts._primed) return;   // don't fire for the backfill on first load
+      try{ new Notification(`RON · ${a.name} ${a.dir==='long'?'LONG':'SHORT'} ${Math.round(a.conv*100)}%`,
+        {body:`entry ${a.entry} · stop ${a.stop} · ${fmtT(a.t)}  —  ${a.reason||""}`, requireInteraction:true}); }catch(e){}
+    });
+  } else { al.forEach(a=>seenAlerts.add(a.id)); }
+  renderAlerts._primed=true;
+}
+
+function drawDonut(seg){
+  const c=$("donut"),ctx=c.getContext("2d");ctx.clearRect(0,0,120,120);
+  const tot=seg.reduce((a,s)=>a+s[1],0)||1;let a=-Math.PI/2;
+  seg.forEach(([,v,col])=>{const ang=v/tot*Math.PI*2;ctx.beginPath();ctx.arc(60,60,52,a,a+ang);
+    ctx.lineWidth=16;ctx.strokeStyle=col;ctx.stroke();a+=ang;});
+  ctx.beginPath();ctx.arc(60,60,52,0,Math.PI*2);ctx.lineWidth=16;ctx.strokeStyle="rgba(0,209,209,.06)";
+  const pct=Math.round(100*seg[0][1]/tot);
+  ctx.fillStyle="#00d1d1";ctx.font="700 22px "+getComputedStyle(document.body).getPropertyValue("--mono");
+  ctx.textAlign="center";ctx.fillText(pct+"%",60,66);ctx.font="10px monospace";ctx.fillStyle="#6fa89d";ctx.fillText("acted",60,80);
+  $("donutLegend").innerHTML=seg.map(([n,v,col])=>`<div class="row"><span class="sw" style="background:${col}"></span>${n}<b>${v}</b></div>`).join("");
+}
+</script>
+</body></html>

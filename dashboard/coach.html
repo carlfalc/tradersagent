@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RON Coach Log</title>
+<style>
+:root{
+  --bg:#f4f7f6; --card:#ffffff; --line:#111317; --line2:#dfe6e4;
+  --fg:#0b0d0c; --muted:#53605d; --dim:#879591; --teal:#007d7d; --teal2:#00a3a3;
+  --pos:#0a8f5c; --neg:#d12a3a; --warn:#a85f00; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#e3f6f6,transparent),var(--bg);
+  color:var(--fg);font:15px/1.5 var(--mono);padding:20px;max-width:1000px;margin:0 auto}
+a{color:var(--teal);text-decoration:none}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.top h1{font-size:22px;margin:0;letter-spacing:2px}
+.pill{border:1px solid var(--line2);border-radius:999px;padding:5px 12px;color:var(--muted);font-size:12px}
+.pill.hot{border-color:var(--teal2);color:var(--teal)}
+.sub{color:var(--muted);margin:4px 0 20px;font-size:12px;line-height:1.6}
+.item{background:linear-gradient(180deg,rgba(0,209,209,.05),transparent),var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.item .when{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--teal);
+  display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.item .when .m{color:var(--muted);text-transform:none;letter-spacing:0}
+.note{font-size:14px;line-height:1.65;color:var(--fg);white-space:pre-wrap}
+.stats{margin-top:12px;font-size:11px;color:var(--muted);border-top:1px solid var(--line2);padding-top:10px}
+.stats b{color:var(--fg)}
+.stats .neg{color:var(--neg)} .stats .pos{color:var(--pos)}
+.empty{color:var(--muted);padding:30px;text-align:center;border:1px dashed var(--line2);border-radius:14px}
+.err{border-color:var(--neg);background:rgba(209,42,58,.06)}
+.err .note{color:var(--neg)}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>RON · COACH LOG</h1>
+    <span class="pill" id="count">—</span>
+    <a href="/dashboard/ron.html"><span class="pill hot">← Agent RON</span></a>
+    <a href="/"><span class="pill hot">Trading →</span></a>
+  </div>
+  <div class="sub">
+    Every review ChatGPT has sent RON, newest first — advisory only, it never trades.
+    RON reviews its real ledger about every 30 minutes.
+  </div>
+  <div id="log"><div class="empty">loading…</div></div>
+
+<script>
+function fmt(ts){ try{ return new Date(ts*1000).toLocaleString(); }catch(e){ return ''; } }
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function load(){
+  let rows=[];
+  try{
+    const r=await fetch('/results/coach_log.json?_='+Date.now());
+    if(r.ok) rows=await r.json();
+  }catch(e){}
+  const el=document.getElementById('log');
+  const cnt=document.getElementById('count');
+  if(!Array.isArray(rows)||!rows.length){
+    cnt.textContent='0 notes';
+    el.innerHTML='<div class="empty">No coach notes yet. Once your OpenAI key is set and a few trades have closed, RON’s reviews will appear here — a new one about every 30 minutes.</div>';
+    return;
+  }
+  cnt.textContent=rows.length+' note'+(rows.length>1?'s':'');
+  el.innerHTML=rows.map(n=>{
+    const bad=n.ok===false;
+    const st=n.stats?`<div class="stats">${n.stats.trades} trades · ${Math.round((n.stats.win_rate||0)*100)}% win · net <b class="${(n.stats.net_aud||0)>=0?'pos':'neg'}">${(n.stats.net_aud||0)>=0?'+':''}${(n.stats.net_aud||0).toFixed(0)} AUD</b></div>`:'';
+    return `<div class="item ${bad?'err':''}">
+      <div class="when"><span>${fmt(n.generated_at)}</span><span class="m">${esc(n.model||'')}</span></div>
+      <div class="note">${esc(n.note)}</div>${st}
+    </div>`;
+  }).join('');
+}
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>
